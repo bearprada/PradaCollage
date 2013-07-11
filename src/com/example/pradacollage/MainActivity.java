@@ -98,8 +98,7 @@ public class MainActivity extends Activity implements OnTextListener {
 
 	public void clickAddPic(View button) {
 		// TODO replace the list view for gallery by myself
-		Intent intent = new Intent(Intent.ACTION_PICK);
-		intent.setType("image/*");
+		Intent intent = new Intent(this, MultipleImagePickerActivity.class);
 		startActivityForResult(intent, SELECT_PHOTO);
 	}
 
@@ -110,14 +109,8 @@ public class MainActivity extends Activity implements OnTextListener {
 		if (resultCode == RESULT_OK) {
 			switch (requestCode) {
 			case SELECT_PHOTO:
-				Uri selectedImage = intent.getData();
-				try {
-					aq.find(R.id.frame_bg).image(
-							BitmapFactory.decodeStream(getContentResolver()
-									.openInputStream(selectedImage)));
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
+				String path = intent.getStringExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
+				aq.find(R.id.frame_bg).image(BitmapFactory.decodeFile(path));
 				break;
 			case ADD_NEW_TEXT:
 				addTextView(
@@ -151,7 +144,6 @@ public class MainActivity extends Activity implements OnTextListener {
 	public void clickAddText(View button) {
 		Intent intent = new Intent(this, TextEditorActivity.class);
 		startActivityForResult(intent, ADD_NEW_TEXT);
-		//addTextView("ด๚ธี",Color.BLUE);
 	}
 
 	@Override
