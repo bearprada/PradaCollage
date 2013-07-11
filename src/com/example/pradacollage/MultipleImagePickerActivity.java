@@ -1,6 +1,8 @@
 package com.example.pradacollage;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
 
 import com.androidquery.AQuery;
@@ -23,10 +25,12 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
 
@@ -37,6 +41,7 @@ public class MultipleImagePickerActivity extends Activity {
 	private GridView listView;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
 	private AQuery aq;
+	private ImageAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,25 +57,17 @@ public class MultipleImagePickerActivity extends Activity {
 				.showImageOnFail(R.drawable.ic_error).cacheInMemory(true)
 				.cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
 		listView = (GridView) findViewById(R.id.gridView);
-		((GridView) listView)
-				.setAdapter(new ImageAdapter(getCameraImages(this)));
-		listView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// startImagePagerActivity(position);
-			    Bundle bundle = new Bundle();  
-			    bundle.putString(EXTRA_IMAGE_PICKER_IMAGE_PATH, (String)listView.getAdapter().getItem(position));
-			    Intent intent = new Intent();  
-			    intent.putExtras(bundle);  
-			    setResult(RESULT_OK, intent);
-			    finish();
-			}
-		});
+		adapter = new ImageAdapter(getCameraImages(this));
+		((GridView) listView).setAdapter(adapter);
 	}
 	
 	public void clickOk(View button){
-		// TODO return the selected items
+		Bundle bundle = new Bundle();  
+	    bundle.putStringArray(EXTRA_IMAGE_PICKER_IMAGE_PATH, adapter.getSelectedItems());
+	    Intent intent = new Intent();  
+	    intent.putExtras(bundle);  
+	    setResult(RESULT_OK, intent);
+	    finish();
 	}
 	
 	public void clickCancel(View button){
@@ -142,9 +139,33 @@ public class MultipleImagePickerActivity extends Activity {
 
 	public class ImageAdapter extends BaseAdapter {
 		private List<String> datasource;
+		private Hashtable<Integer,Boolean> selectionTable = new Hashtable<Integer,Boolean>();
 
 		public ImageAdapter(List<String> cameraImages) {
 			datasource = cameraImages;
+		}
+		
+		private void selected(int position){
+			// TODO add the ui effect
+			if(selectionTable.contains(position)){
+				selectionTable.remove(position);
+			}else{
+				selectionTable.put(position, true);
+			}
+		}
+		
+		public String[] getSelectedItems(){
+			String[] items = new String[selectionTable.size()];
+			Enumeration<Integer> ks = selectionTable.keys();
+			int count = 0;
+			while(ks.hasMoreElements()){
+				items[count++] = datasource.get(ks.nextElement());
+			}
+			return items;
+		}
+		
+		private boolean isSelected(int position){
+			return selectionTable.contains(position);
 		}
 
 		@Override
@@ -163,19 +184,26 @@ public class MultipleImagePickerActivity extends Activity {
 		}
 
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			final ImageView imageView;
+		public View getView(final int position, View convertView, ViewGroup parent) {
+			final View view;
+			ImageView imageView;
 			if (convertView == null) {
-				imageView = (ImageView) getLayoutInflater().inflate(
-						R.layout.item_grid_image, parent, false);
+				view = getLayoutInflater().inflate(R.layout.item_grid_image, parent, false);
+				imageView = (ImageView) view.findViewById(R.id.image);
+				view.findViewById(R.id.checkBox).setOnClickListener(new OnClickListener() {
+		                public void onClick(View v) {
+		                    selected(position);
+		                }
+		            });
 			} else {
-				imageView = (ImageView) convertView;
+				view = convertView;
+				imageView = (ImageView) convertView.findViewById(R.id.image);
 			}
-
+			((CheckBox)view.findViewById(R.id.checkBox)).setChecked(isSelected(position));
 			imageLoader.displayImage("file://"+datasource.get(position), imageView,
 					options);
 
-			return imageView;
+			return view;
 		}
 	}
 

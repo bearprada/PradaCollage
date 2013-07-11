@@ -109,8 +109,11 @@ public class MainActivity extends Activity implements OnTextListener {
 		if (resultCode == RESULT_OK) {
 			switch (requestCode) {
 			case SELECT_PHOTO:
-				String path = intent.getStringExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
-				aq.find(R.id.frame_bg).image(BitmapFactory.decodeFile(path));
+				//String path = intent.getStringExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
+				String[] paths = intent.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
+				if(paths.length>0){
+					aq.find(R.id.frame_bg).image(BitmapFactory.decodeFile(paths[0]));
+				}
 				break;
 			case ADD_NEW_TEXT:
 				addTextView(
