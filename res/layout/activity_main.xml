@@ -2,11 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity" 
+    android:background="#FFFFFF">
 
     <RelativeLayout
         android:id="@+id/frame"
@@ -22,26 +19,26 @@
 
     <Button
         android:id="@+id/btnAddText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48sp"
+        android:layout_height="48sp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:text="Add Text" />
+        android:background="@drawable/add_text" />
 
     <Button
         android:id="@+id/btnSave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48sp"
+        android:layout_height="48sp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Save" />
+        android:background="@drawable/save" />
 
     <Button
         android:id="@+id/btnAddPic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48sp"
+        android:layout_height="48sp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="Add Piucture" />
+        android:background="@drawable/add" />
 
 </RelativeLayout>

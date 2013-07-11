@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity" >
+    android:background="#FFFFFF" >
 
     <EditText
         android:id="@+id/editText1"
@@ -19,17 +19,17 @@
 
     <Button
         android:id="@+id/btnFinish"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48sp"
+        android:layout_height="48sp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="完成" />
+        android:background="@drawable/ok" />
 
     <afzkl.development.mColorPicker.views.ColorPickerView
         android:id="@+id/colorPickerView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/btnFinish"
-        android:layout_alignRight="@+id/btnFinish" />
+        android:layout_alignLeft="@+id/editText1"
+        android:layout_below="@+id/editText1" />
 
 </RelativeLayout>
