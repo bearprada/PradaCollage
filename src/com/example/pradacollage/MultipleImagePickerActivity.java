@@ -34,7 +34,7 @@ import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class MultipleImagePickerActivity extends Activity {
+public class MultipleImagePickerActivity extends Activity implements OnItemClickListener {
 
 	protected static final String EXTRA_IMAGE_PICKER_IMAGE_PATH = "image_path";
 	private DisplayImageOptions options;
@@ -57,8 +57,10 @@ public class MultipleImagePickerActivity extends Activity {
 				.showImageOnFail(R.drawable.ic_error).cacheInMemory(true)
 				.cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
 		listView = (GridView) findViewById(R.id.gridView);
+		
 		adapter = new ImageAdapter(getCameraImages(this));
 		((GridView) listView).setAdapter(adapter);
+		listView.setOnItemClickListener(this);
 	}
 	
 	public void clickOk(View button){
@@ -101,7 +103,6 @@ public class MultipleImagePickerActivity extends Activity {
 		// Get the base URI for the People table in the Contacts content
 		// provider.
 		Uri images = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
 		// Make the query.
 		Cursor cur = managedQuery(images, projection, // Which columns to return
 				"", // Which rows to return (all rows)
@@ -147,11 +148,13 @@ public class MultipleImagePickerActivity extends Activity {
 		
 		private void selected(int position){
 			// TODO add the ui effect
-			if(selectionTable.contains(position)){
+			if(selectionTable.containsKey(position)){
 				selectionTable.remove(position);
 			}else{
 				selectionTable.put(position, true);
 			}
+			Log.d("TEST","----- selected : "+ position+" " +isSelected(position));
+			notifyDataSetChanged();
 		}
 		
 		public String[] getSelectedItems(){
@@ -165,7 +168,7 @@ public class MultipleImagePickerActivity extends Activity {
 		}
 		
 		private boolean isSelected(int position){
-			return selectionTable.contains(position);
+			return selectionTable.containsKey(position);
 		}
 
 		@Override
@@ -186,23 +189,16 @@ public class MultipleImagePickerActivity extends Activity {
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			final View view;
-			ImageView imageView;
 			if (convertView == null) {
 				view = getLayoutInflater().inflate(R.layout.item_grid_image, parent, false);
-				imageView = (ImageView) view.findViewById(R.id.image);
-				view.findViewById(R.id.checkBox).setOnClickListener(new OnClickListener() {
-		                public void onClick(View v) {
-		                    selected(position);
-		                }
-		            });
 			} else {
 				view = convertView;
-				imageView = (ImageView) convertView.findViewById(R.id.image);
 			}
-			((CheckBox)view.findViewById(R.id.checkBox)).setChecked(isSelected(position));
-			imageLoader.displayImage("file://"+datasource.get(position), imageView,
+			
+			Log.d("TEST","@@@@ "+position + " " +isSelected(position));
+			view.findViewById(R.id.imageView1).setVisibility((isSelected(position)?View.VISIBLE:View.INVISIBLE));
+			imageLoader.displayImage("file://"+datasource.get(position), (ImageView) view.findViewById(R.id.image),
 					options);
-
 			return view;
 		}
 	}
@@ -212,6 +208,11 @@ public class MultipleImagePickerActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.multiple_image_picker, menu);
 		return true;
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+		adapter.selected(position);
 	}
 
 }
