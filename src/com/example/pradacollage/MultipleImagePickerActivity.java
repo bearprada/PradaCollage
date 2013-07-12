@@ -33,6 +33,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class MultipleImagePickerActivity extends Activity implements OnItemClickListener {
 
@@ -61,6 +62,12 @@ public class MultipleImagePickerActivity extends Activity implements OnItemClick
 		adapter = new ImageAdapter(getCameraImages(this));
 		((GridView) listView).setAdapter(adapter);
 		listView.setOnItemClickListener(this);
+	}
+	
+	@Override
+	protected void onDestroy(){
+		super.onDestroy();
+		adapter.dispose();
 	}
 	
 	public void clickOk(View button){
@@ -147,14 +154,16 @@ public class MultipleImagePickerActivity extends Activity implements OnItemClick
 		}
 		
 		private void selected(int position){
-			// TODO add the ui effect
-			if(selectionTable.containsKey(position)){
-				selectionTable.remove(position);
+			if(selectionTable.size()>Constants.SUPPORTED_FRAME_NUMBER){
+				Toast.makeText(MultipleImagePickerActivity.this, R.string.over_num_of_images, Toast.LENGTH_LONG).show();
 			}else{
-				selectionTable.put(position, true);
+				if(selectionTable.containsKey(position)){
+					selectionTable.remove(position);
+				}else{
+					selectionTable.put(position, true);
+				}
+				notifyDataSetChanged();
 			}
-			Log.d("TEST","----- selected : "+ position+" " +isSelected(position));
-			notifyDataSetChanged();
 		}
 		
 		public String[] getSelectedItems(){
@@ -184,6 +193,13 @@ public class MultipleImagePickerActivity extends Activity implements OnItemClick
 		@Override
 		public long getItemId(int position) {
 			return position;
+		}
+		
+		public void dispose(){
+			datasource.clear();
+			datasource = null;
+			selectionTable.clear();
+			selectionTable = null;
 		}
 
 		@Override

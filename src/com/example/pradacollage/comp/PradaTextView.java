@@ -1,4 +1,4 @@
-package com.example.pradacollage;
+package com.example.pradacollage.comp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -8,13 +8,14 @@ import android.text.TextPaint;
 import android.util.FloatMath;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
  * TODO replace the TextView implementation into the View with canvas solution
  * */
-public class PradaTextView extends TextView {
+public class PradaTextView extends TextView implements PradaText {
 	private GestureDetector gestureDetector;
 
 	static final int NONE = 0;
@@ -32,7 +33,7 @@ public class PradaTextView extends TextView {
 
 	private OnTextListener listener;
 
-	public PradaTextView(Context context, OnTextListener listener) {
+	PradaTextView(Context context, OnTextListener listener) {
 		super(context);
 		gestureDetector = new GestureDetector(context, new GestureListener());
 		this.listener = listener;
@@ -116,8 +117,22 @@ public class PradaTextView extends TextView {
 			return true;
 		}
 	}
-	
-	public interface OnTextListener{
-		public void onModifyText(PradaTextView view,String text,int color);
+
+	@Override
+	public void setText(String text, int color) {
+		setText(text);
+		setTextColor(color);
 	}
+
+	@Override
+	public View getView() {
+		return this;
+	}
+
+	@Override
+	public void setXY(int x, int y) {
+		setX(x);
+		setY(y);
+	}
+
 }

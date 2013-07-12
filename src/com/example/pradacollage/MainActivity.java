@@ -3,15 +3,23 @@ package com.example.pradacollage;
 import java.util.UUID;
 
 import com.androidquery.AQuery;
-import com.example.pradacollage.PradaTextView.OnTextListener;
+import com.example.pradacollage.comp.PradaText;
+import com.example.pradacollage.comp.PradaText.OnTextListener;
+import com.example.pradacollage.comp.PradaTextCanvas;
+import com.example.pradacollage.comp.PradaTextFactory;
+import com.example.pradacollage.comp.PradaTextView;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +29,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 public class MainActivity extends Activity implements OnTextListener {
 
@@ -30,7 +40,9 @@ public class MainActivity extends Activity implements OnTextListener {
 
 	private AQuery aq;
 	private ProgressDialog progressDialog;
-	private ViewGroup picture;
+	private ViewGroup allViews;
+	private ViewGroup textViews;
+	private ViewGroup imageViews;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +52,9 @@ public class MainActivity extends Activity implements OnTextListener {
 		aq.find(R.id.btnSave).clicked(this, "clickSave");
 		aq.find(R.id.btnAddPic).clicked(this, "clickAddPic");
 		aq.find(R.id.btnAddText).clicked(this, "clickAddText");
-		picture = (ViewGroup) aq.find(R.id.frame).getView();
+		allViews = (ViewGroup) aq.find(R.id.frame).getView();
+		textViews= (ViewGroup) aq.find(R.id.frame_texts).getView();
+		imageViews= (ViewGroup) aq.find(R.id.frame_images).getView();
 	}
 
 	public void clickSave(View button) {
@@ -50,13 +64,14 @@ public class MainActivity extends Activity implements OnTextListener {
 			@SuppressLint("NewApi")
 			@Override
 			protected Void doInBackground(Void... params) {
-				Bitmap largeBitmap = Bitmap.createBitmap(picture.getWidth(),
-						picture.getHeight(), Bitmap.Config.ARGB_8888);
+
+				Bitmap largeBitmap = Bitmap.createBitmap(allViews.getWidth(),
+						allViews.getHeight(), Bitmap.Config.ARGB_8888);
 				Canvas canvas = new Canvas(largeBitmap);
-				for (int i = 0; i < picture.getChildCount(); i++) {
-					View v = picture.getChildAt(i);
-					canvas.drawBitmap(loadBitmapFromView(v), v.getX(), v.getY(),
-							null);
+				for (int i = 0; i < allViews.getChildCount(); i++) {
+					View v = allViews.getChildAt(i);
+					canvas.drawBitmap(loadBitmapFromView(v), v.getX(),
+							v.getY(), null);
 				}
 				Bitmap mediumBitmap = Bitmap.createScaledBitmap(largeBitmap,
 						(int) (largeBitmap.getWidth() * 0.6),
@@ -66,14 +81,14 @@ public class MainActivity extends Activity implements OnTextListener {
 						(int) (largeBitmap.getHeight() * 0.4), false);
 				ContentResolver cr = getContentResolver();
 				String fileNamePrefix = "prada_" + UUID.randomUUID().toString();
-				Log.d("TEST", MediaStore.Images.Media.insertImage(cr, largeBitmap,
-						fileNamePrefix + "_large", ""));
+				Log.d("TEST", MediaStore.Images.Media.insertImage(cr,
+						largeBitmap, fileNamePrefix + "_large", ""));
 				largeBitmap.recycle();
-				Log.d("TEST", MediaStore.Images.Media.insertImage(cr, mediumBitmap,
-						fileNamePrefix + "_medium", ""));
+				Log.d("TEST", MediaStore.Images.Media.insertImage(cr,
+						mediumBitmap, fileNamePrefix + "_medium", ""));
 				mediumBitmap.recycle();
-				Log.d("TEST", MediaStore.Images.Media.insertImage(cr, smallBitmap,
-						fileNamePrefix + "_small", ""));
+				Log.d("TEST", MediaStore.Images.Media.insertImage(cr,
+						smallBitmap, fileNamePrefix + "_small", ""));
 				smallBitmap.recycle();
 				return null;
 			}
@@ -87,8 +102,8 @@ public class MainActivity extends Activity implements OnTextListener {
 	}
 
 	public static Bitmap loadBitmapFromView(View v) {
-		Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(),
-				Bitmap.Config.ARGB_8888);
+		Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(),
+				v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
 		Canvas c = new Canvas(b);
 		v.draw(c);
 		return b;
@@ -106,16 +121,35 @@ public class MainActivity extends Activity implements OnTextListener {
 		if (resultCode == RESULT_OK) {
 			switch (requestCode) {
 			case SELECT_PHOTO:
-				//String path = intent.getStringExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
-				String[] paths = intent.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
-				if(paths.length>0){
-					int gapX = picture.getWidth()/3;
-					int gapY = picture.getHeight()/3;
-					for(int i=0;i<paths.length;i++){
-						//TODO arrange it 
+				String[] paths = intent
+						.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
+				if (paths.length > 0) {
+					// Clear current imageviews
+					clearImages();
+					int gapX = imageViews.getWidth()
+							/ Constants.SUPPORTED_FRAME_WIDTH;
+					int gapY = imageViews.getHeight()
+							/ Constants.SUPPORTED_FRAME_HEIGHT;
+					int x, y;
+					ImageView iv;
+					for (int i = 0; i < paths.length; i++) {
+						x = (i % Constants.SUPPORTED_FRAME_WIDTH) * gapX;
+						y = (i / Constants.SUPPORTED_FRAME_WIDTH) * gapY;
+
+						/**
+						 * TODO replace the customized ImageView to support
+						 * pinch zoom, and replace image by double tap
+						 */
+						iv = new ImageView(this);
+						iv.setImageBitmap(BitmapFactory.decodeFile(paths[i]));
+						RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+								gapX, gapY);
+						params.setMargins(x, y, 0, 0);
+						iv.setLayoutParams(params);
+						imageViews.addView(iv);
 					}
-						
-					aq.find(R.id.frame_bg).image(BitmapFactory.decodeFile(paths[0]));
+					imageViews.invalidate();
+					// Log.d("TEST","~~ add images after "+picture.getChildCount());
 				}
 				break;
 			case ADD_NEW_TEXT:
@@ -126,9 +160,13 @@ public class MainActivity extends Activity implements OnTextListener {
 								Color.BLACK));
 				break;
 			case MODIFY_TEXT:
-				if(currentSelectedText!=null){
-					currentSelectedText.setText(intent.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT));
-					currentSelectedText.setTextColor(intent.getIntExtra(TextEditorActivity.EXTRA_EDITOR_COLOR,Color.BLACK));
+				if (currentSelectedText != null) {
+					currentSelectedText
+							.setText(
+									intent.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT),
+									intent.getIntExtra(
+											TextEditorActivity.EXTRA_EDITOR_COLOR,
+											Color.BLACK));
 					currentSelectedText = null;
 				}
 				break;
@@ -136,15 +174,29 @@ public class MainActivity extends Activity implements OnTextListener {
 		}
 	}
 
+	private void clearImages() {
+		View view;
+		// Log.d("TEST","~~ clear before "+picture.getChildCount());
+		imageViews.removeAllViews();
+		/*int len = imageViews.getChildCount();
+		int idx = 0;
+		for (int i = 0; i < len; i++) {
+			view = allViews.getChildAt(idx);
+			if (view instanceof ImageView) {
+				allViews.removeView(view);
+			} else {
+				idx++;
+			}
+		}*/
+		// Log.d("TEST","~~ clear after "+picture.getChildCount());
+	}
+
 	@SuppressLint("NewApi")
 	private void addTextView(String text, int color) {
-		PradaTextView tv = new PradaTextView(this,this);
-		tv.setText(text);
-		tv.setTextColor(color);
-		tv.setX(picture.getWidth() / 2);
-		tv.setY(picture.getHeight() / 2);
-		tv.setTextSize(30);
-		picture.addView(tv);
+		PradaText tv = PradaTextFactory.create(this, this);
+		tv.setXY(textViews.getWidth() / 2, textViews.getHeight() / 2);
+		tv.setText(text, color);
+		textViews.addView(tv.getView());
 	}
 
 	public void clickAddText(View button) {
@@ -154,20 +206,38 @@ public class MainActivity extends Activity implements OnTextListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
-	private PradaTextView currentSelectedText = null;
+
+	private PradaText currentSelectedText = null;
 
 	@Override
-	public void onModifyText(PradaTextView view, String text, int color) {
+	public void onModifyText(PradaText view, String text, int color) {
 		Intent intent = new Intent(this, TextEditorActivity.class);
 		currentSelectedText = view;
 		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_TEXT, text);
 		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_COLOR, color);
-		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_TYPE, TextEditorActivity.TYPE_UPDATE);
+		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_TYPE,
+				TextEditorActivity.TYPE_UPDATE);
 		startActivityForResult(intent, MODIFY_TEXT);
+	}
+
+	@Override
+	public void onBackPressed() {
+		new AlertDialog.Builder(this).setTitle(R.string.dialog_exit_title).setMessage(R.string.dialog_exit_message)
+				.setPositiveButton(R.string.dialog_exit_ok, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int arg1) {
+						dialog.dismiss();
+						finish();
+					}
+
+				}).setNegativeButton(R.string.dialog_exit_cancel, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				}).show();
 	}
 }
