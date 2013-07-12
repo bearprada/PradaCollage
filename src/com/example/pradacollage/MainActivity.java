@@ -1,12 +1,10 @@
 package com.example.pradacollage;
 
-import java.io.FileNotFoundException;
 import java.util.UUID;
 
 import com.androidquery.AQuery;
 import com.example.pradacollage.PradaTextView.OnTextListener;
 
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -97,7 +95,6 @@ public class MainActivity extends Activity implements OnTextListener {
 	}
 
 	public void clickAddPic(View button) {
-		// TODO replace the list view for gallery by myself
 		Intent intent = new Intent(this, MultipleImagePickerActivity.class);
 		startActivityForResult(intent, SELECT_PHOTO);
 	}
@@ -112,6 +109,12 @@ public class MainActivity extends Activity implements OnTextListener {
 				//String path = intent.getStringExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
 				String[] paths = intent.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
 				if(paths.length>0){
+					int gapX = picture.getWidth()/3;
+					int gapY = picture.getHeight()/3;
+					for(int i=0;i<paths.length;i++){
+						//TODO arrange it 
+					}
+						
 					aq.find(R.id.frame_bg).image(BitmapFactory.decodeFile(paths[0]));
 				}
 				break;
