@@ -51,4 +51,12 @@
         android:layout_alignParentRight="true"
         android:background="@drawable/add" />
 
+    <Button
+        android:id="@+id/btnAddGlasses"
+        android:layout_width="48sp"
+        android:layout_height="48sp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/glasses" />
+
 </RelativeLayout>

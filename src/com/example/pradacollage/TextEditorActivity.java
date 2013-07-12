@@ -21,8 +21,8 @@ public class TextEditorActivity extends Activity implements OnColorChangedListen
 	public final static String EXTRA_EDITOR_TYPE = "type";
 	public final static String EXTRA_EDITOR_TEXT = "text";
 	public final static String EXTRA_EDITOR_COLOR = "color";
-	//public final static String EXTRA_EDITOR_BORDER = "border"; //TODO set the border 
-	//public final static String EXTRA_EDITOR_FONT = "font";
+	public final static String EXTRA_EDITOR_BORDER = "border";
+	//public final static String EXTRA_EDITOR_FONT = "font"; //TODO set the border 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +40,7 @@ public class TextEditorActivity extends Activity implements OnColorChangedListen
 		case TYPE_UPDATE:
 			aq.find(R.id.editText1).text(getIntent().getStringExtra(EXTRA_EDITOR_TEXT));
 			cp.setColor(getIntent().getIntExtra(EXTRA_EDITOR_COLOR,Color.BLACK));
+			aq.find(R.id.checkBoxHasStroke).checked(getIntent().getBooleanExtra(EXTRA_EDITOR_BORDER, false));
 			break;
 		}
 	}
@@ -48,8 +49,9 @@ public class TextEditorActivity extends Activity implements OnColorChangedListen
 	    Bundle bundle = new Bundle();  
 	    bundle.putString(EXTRA_EDITOR_TEXT, aq.find(R.id.editText1).getEditText().getText().toString());  
 	    bundle.putInt(EXTRA_EDITOR_COLOR, currentSelectColor);
+	    bundle.putBoolean(EXTRA_EDITOR_BORDER, aq.find(R.id.checkBoxHasStroke).isChecked());
 	    Intent intent = new Intent();  
-	    intent.putExtras(bundle);  
+	    intent.putExtras(bundle);
 	    setResult(RESULT_OK, intent);
 		finish();
 	}

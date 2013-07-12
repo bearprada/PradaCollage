@@ -10,5 +10,8 @@
     <string name="dialog_exit_ok">Of Course</string>
     <string name="dialog_exit_cancel">No</string>
     <string name="dialog_exit_message">The Application Will Destory After You Click &quot;Of Course&quot;</string>
+    <string name="progress_title">progressing ...</string>
+    <string name="progress_message">Please wait a moment</string>
+    <string name="has_stroke">Has Stroke</string>
 
 </resources>

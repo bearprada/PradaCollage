@@ -113,13 +113,13 @@ public class PradaTextView extends TextView implements PradaText {
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
 			if(listener!=null)
-				listener.onModifyText(PradaTextView.this, getText().toString(),getCurrentTextColor());
+				listener.onModifyText(PradaTextView.this, getText().toString(),getCurrentTextColor(),false);
 			return true;
 		}
 	}
 
 	@Override
-	public void setText(String text, int color) {
+	public void setText(String text, int color, boolean hasStroke) {
 		setText(text);
 		setTextColor(color);
 	}
