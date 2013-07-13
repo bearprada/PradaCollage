@@ -32,7 +32,6 @@ public class GlassDetector {
 		this.ctx = ctx;
 	}
 
-	// TODO add the transaction situation
 	public void detectFaces(ViewGroup vg) {
 		int len = vg.getChildCount();
 		View view;
@@ -49,13 +48,11 @@ public class GlassDetector {
 				iv.getMeasuredHeight(), Bitmap.Config.RGB_565);
 		Canvas c = new Canvas(b);
 		iv.draw(c);
-		detectFaces(b, iv.getWidth(), iv.getHeight(), 
-				iv.getLeft() + (int)iv.getTranslationX(), 
-				iv.getTop()+ (int)iv.getTranslationY());
+		detectFaces(b, iv);
 	}
 
-	private void detectFaces(Bitmap b, int w, int h, int left, int top) {
-		FaceDetector fd = new FaceDetector(w, h, MAX_FACES);
+	private void detectFaces(Bitmap b, View view) {
+		FaceDetector fd = new FaceDetector(view.getWidth(), view.getHeight(), MAX_FACES);
 		FaceDetector.Face[] faces = new FaceDetector.Face[MAX_FACES];
 		fd.findFaces(b, faces);
 		for (FaceDetector.Face f : faces) {
@@ -65,23 +62,25 @@ public class GlassDetector {
 				float eyesdist = f.eyesDistance();
 				addGlasses((int) (midPoint.x - eyesdist / 2), (int) midPoint.y,
 						(int) (midPoint.x + eyesdist / 2), (int) midPoint.y,
-						left, top);
+						view);
 			}
 		}
 	}
 
-	private void addGlasses(int x1, int y1, int x2, int y2, int offsetX,
-			int offsetY) {
-		Log.d("TEST", "=========== add glasses :" + x1 + " " + y1 + " " + x2
-				+ " " + y2);
+	private void addGlasses(int x1, int y1, int x2, int y2, View view) {
 		PradaImage iv = new PradaImage(ctx,null);
 		iv.setImageResource(GLASSES_RES_LIST[random.nextInt(GLASSES_RES_LIST.length)]);
 		int w = Math.abs(x2 - x1);
 		int h = w / 2;// FIXME
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(w, h);
-		params.leftMargin = x1 + offsetX;
-		params.topMargin = y1 + offsetY;
+		params.leftMargin = x1 + view.getLeft();
+		params.topMargin = y1 + view.getTop();
 		iv.setLayoutParams(params);
+		iv.setRotation(view.getRotation());
+		iv.setTranslationX(view.getTranslationX());
+		iv.setTranslationY(view.getTranslationY());
+		iv.setScaleX(view.getScaleX());
+		iv.setScaleY(view.getScaleY());
 		root.addView(iv);
 	}
 }

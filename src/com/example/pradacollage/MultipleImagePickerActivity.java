@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -101,46 +102,16 @@ public class MultipleImagePickerActivity extends Activity implements OnItemClick
 	}
 
 	public List<String> getCameraImages(Context context) {
-		// which image properties are we querying
-		String[] projection = new String[] { MediaStore.Images.Media._ID,
-				MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
-				MediaStore.Images.Media.DATE_TAKEN,
-				MediaStore.Images.Media.DATA };
-
-		// Get the base URI for the People table in the Contacts content
-		// provider.
+		String[] projection = new String[] { MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA };
 		Uri images = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-		// Make the query.
-		Cursor cur = managedQuery(images, projection, // Which columns to return
-				"", // Which rows to return (all rows)
-				null, // Selection arguments (none)
-				"" // Ordering
-		);
-
+		Cursor cur = new CursorLoader(this,images,projection,"",null,"").loadInBackground();
 		Log.i("ListingImages", " query count=" + cur.getCount());
 		ArrayList<String> imagePaths = new ArrayList<String>(cur.getCount());
+		int rawCol = cur.getColumnIndex(MediaStore.Images.Media.DATA);
 		if (cur.moveToFirst()) {
-			String bucket;
-			String token;
-			String data;
-			int bucketColumn = cur
-					.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-
-			int dateColumn = cur
-					.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN);
-			int rawCol = cur.getColumnIndex(MediaStore.Images.Media.DATA);
-
 			do {
-				// Get the field values
-				bucket = cur.getString(bucketColumn);
-				token = cur.getString(dateColumn);
-				data = cur.getString(rawCol);
-				imagePaths.add(data);
-				// Do something with the values.
-				Log.i("ListingImages", " bucket=" + bucket + "  date_taken="
-						+ token + " data = " + data);
+				imagePaths.add(cur.getString(rawCol));
 			} while (cur.moveToNext());
-
 		}
 		return imagePaths;
 	}
