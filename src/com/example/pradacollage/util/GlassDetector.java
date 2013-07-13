@@ -49,7 +49,9 @@ public class GlassDetector {
 				iv.getMeasuredHeight(), Bitmap.Config.RGB_565);
 		Canvas c = new Canvas(b);
 		iv.draw(c);
-		detectFaces(b, iv.getWidth(), iv.getHeight(), iv.getLeft(), iv.getTop());
+		detectFaces(b, iv.getWidth(), iv.getHeight(), 
+				iv.getLeft() + (int)iv.getTranslationX(), 
+				iv.getTop()+ (int)iv.getTranslationY());
 	}
 
 	private void detectFaces(Bitmap b, int w, int h, int left, int top) {

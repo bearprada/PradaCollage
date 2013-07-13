@@ -39,12 +39,6 @@
             android:label="@string/title_activity_multiple_image_picker"
             android:screenOrientation="portrait" >
         </activity>
-        <activity android:name="TestFaceDetection" >
-      
-        </activity>
-        <activity android:name="TestTouchActivity">
-                
-        </activity>
     </application>
 
 </manifest>
