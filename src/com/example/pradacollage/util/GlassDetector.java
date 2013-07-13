@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.example.pradacollage.R;
 import com.example.pradacollage.comp.PradaImage;
-import com.example.pradacollage.comp.PradaImage2;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -33,6 +32,7 @@ public class GlassDetector {
 		this.ctx = ctx;
 	}
 
+	// TODO add the transaction situation
 	public void detectFaces(ViewGroup vg) {
 		int len = vg.getChildCount();
 		View view;
@@ -72,13 +72,13 @@ public class GlassDetector {
 			int offsetY) {
 		Log.d("TEST", "=========== add glasses :" + x1 + " " + y1 + " " + x2
 				+ " " + y2);
-		PradaImage2 iv = new PradaImage2(ctx);
+		PradaImage iv = new PradaImage(ctx,null);
 		iv.setImageResource(GLASSES_RES_LIST[random.nextInt(GLASSES_RES_LIST.length)]);
 		int w = Math.abs(x2 - x1);
 		int h = w / 2;// FIXME
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(w, h);
 		params.leftMargin = x1 + offsetX;
-		params.topMargin = y1 + offsetY;// FIXME
+		params.topMargin = y1 + offsetY;
 		iv.setLayoutParams(params);
 		root.addView(iv);
 	}

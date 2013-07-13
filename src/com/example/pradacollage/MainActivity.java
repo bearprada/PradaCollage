@@ -1,43 +1,46 @@
 package com.example.pradacollage;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.UUID;
+import java.io.InputStream;
 
 import com.androidquery.AQuery;
+import com.example.pradacollage.comp.PradaImage;
+import com.example.pradacollage.comp.PradaImage.OnImageListener;
 import com.example.pradacollage.comp.PradaText;
 import com.example.pradacollage.comp.PradaText.OnTextListener;
 import com.example.pradacollage.comp.PradaTextFactory;
+import com.example.pradacollage.util.CameraImageTranslator;
 import com.example.pradacollage.util.GlassDetector;
+import com.example.pradacollage.util.ImageStorageHelper;
+import com.example.pradacollage.util.ImageStorageHelper.onSaveListener;
 
-import android.media.ExifInterface;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-public class MainActivity extends Activity implements OnTextListener {
+public class MainActivity extends Activity implements OnTextListener,
+		OnImageListener {
 
 	private static final int SELECT_PHOTO = 0;
 	private static final int ADD_NEW_TEXT = 1;
 	private static final int MODIFY_TEXT = 2;
+	private static final int MODIFY_PHOTO = 3;
 
 	private AQuery aq;
 	private ProgressDialog progressDialog;
@@ -74,53 +77,18 @@ public class MainActivity extends Activity implements OnTextListener {
 
 	public void clickSave(View button) {
 		showProgressDialog(true);
-		AsyncTask<Void, Void, Void> saveImagesTask = new AsyncTask<Void, Void, Void>() {
-			@SuppressLint("NewApi")
-			@Override
-			protected Void doInBackground(Void... params) {
+		ImageStorageHelper.save(getContentResolver(), allViews,
+				new onSaveListener() {
+					@Override
+					public void onSaveSuccess() {
+						showProgressDialog(false);
+					}
 
-				Bitmap largeBitmap = Bitmap.createBitmap(allViews.getWidth(),
-						allViews.getHeight(), Bitmap.Config.ARGB_8888);
-				Canvas canvas = new Canvas(largeBitmap);
-				for (int i = 0; i < allViews.getChildCount(); i++) {
-					View v = allViews.getChildAt(i);
-					canvas.drawBitmap(loadBitmapFromView(v), v.getX(),
-							v.getY(), null);
-				}
-				Bitmap mediumBitmap = Bitmap.createScaledBitmap(largeBitmap,
-						(int) (largeBitmap.getWidth() * 0.6),
-						(int) (largeBitmap.getHeight() * 0.6), false);
-				Bitmap smallBitmap = Bitmap.createScaledBitmap(largeBitmap,
-						(int) (largeBitmap.getWidth() * 0.4),
-						(int) (largeBitmap.getHeight() * 0.4), false);
-				ContentResolver cr = getContentResolver();
-				String fileNamePrefix = "prada_" + UUID.randomUUID().toString();
-				Log.d("TEST", MediaStore.Images.Media.insertImage(cr,
-						largeBitmap, fileNamePrefix + "_large", ""));
-				largeBitmap.recycle();
-				Log.d("TEST", MediaStore.Images.Media.insertImage(cr,
-						mediumBitmap, fileNamePrefix + "_medium", ""));
-				mediumBitmap.recycle();
-				Log.d("TEST", MediaStore.Images.Media.insertImage(cr,
-						smallBitmap, fileNamePrefix + "_small", ""));
-				smallBitmap.recycle();
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Void result) {
-				showProgressDialog(false);
-			}
-		};
-		saveImagesTask.execute();
-	}
-
-	public static Bitmap loadBitmapFromView(View v) {
-		Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(),
-				v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-		Canvas c = new Canvas(b);
-		v.draw(c);
-		return b;
+					@Override
+					public void onSaveFail() {
+						showProgressDialog(false);
+					}
+				});
 	}
 
 	public void clickAddPic(View button) {
@@ -134,12 +102,17 @@ public class MainActivity extends Activity implements OnTextListener {
 		 * 
 		 * @Override public void run() {
 		 */
+		cleanSticks();
 		GlassDetector detector = new GlassDetector(MainActivity.this,
-				(ViewGroup) aq.find(R.id.frame_texts).getView());
+				(ViewGroup) aq.find(R.id.frame_sticks).getView());
 		detector.detectFaces((ViewGroup) aq.find(R.id.frame_images).getView());
 		/*
 		 * showProgressDialog(false); } }).start();
 		 */
+	}
+
+	private void cleanSticks() {
+		((ViewGroup) aq.find(R.id.frame_sticks).getView()).removeAllViews();
 	}
 
 	@Override
@@ -158,27 +131,24 @@ public class MainActivity extends Activity implements OnTextListener {
 					int gapY = imageViews.getHeight()
 							/ Constants.SUPPORTED_FRAME_HEIGHT;
 					int x, y;
-					ImageView iv;
+					// ImageView iv;
+					PradaImage iv;
 
 					for (int i = 0; i < paths.length; i++) {
 						x = (i % Constants.SUPPORTED_FRAME_WIDTH) * gapX;
 						y = (i / Constants.SUPPORTED_FRAME_WIDTH) * gapY;
 
-						/**
-						 * TODO replace the customized ImageView to support
-						 * pinch zoom, and replace image by double tap
-						 */
-
-						iv = new ImageView(this);
+						// iv = new ImageView(this);
+						iv = new PradaImage(this, this);
 						try {
-							iv.setImageBitmap(checkPhotoRotation(paths[i]));
+							iv.setImageBitmap(CameraImageTranslator
+									.checkPhotoRotation(paths[i]));
 							RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
 									gapX, gapY);
 							params.setMargins(x, y, 0, 0);
 							iv.setLayoutParams(params);
 							imageViews.addView(iv);
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 
@@ -186,78 +156,58 @@ public class MainActivity extends Activity implements OnTextListener {
 					imageViews.invalidate();
 				}
 				break;
+			case MODIFY_PHOTO:
+				if (currentSelectedImage != null) {
+					try {
+						Bitmap bitmap = CameraImageTranslator.checkPhotoRotation(getRealPathFromURI(intent.getData()));
+						if(bitmap!=null){
+							currentSelectedImage.setImageBitmap(bitmap);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					currentSelectedImage = null;
+				}
+				break;
 			case ADD_NEW_TEXT:
-				String text = intent.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
-				if(text==null||text.trim()==null)
+				String text = intent
+						.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
+				if (text == null || text.trim() == null)
 					return;
-				addTextView(
-						text,
-						intent.getIntExtra(
-								TextEditorActivity.EXTRA_EDITOR_COLOR,
-								Color.BLACK), intent.getBooleanExtra(
-								TextEditorActivity.EXTRA_EDITOR_BORDER, false));
+				int color = intent.getIntExtra(
+						TextEditorActivity.EXTRA_EDITOR_COLOR, Color.BLACK);
+				boolean hasStroke = intent.getBooleanExtra(
+						TextEditorActivity.EXTRA_EDITOR_BORDER, false);
+				addTextView(text, color, hasStroke);
 				break;
 			case MODIFY_TEXT:
 				if (currentSelectedText != null) {
-					String txt = intent.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
-					if(txt==null||txt.trim()==null)
+					String txt = intent
+							.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
+					if (txt == null || txt.trim() == null)
 						return;
-					currentSelectedText
-							.setText(
-									txt,
-									intent.getIntExtra(
-											TextEditorActivity.EXTRA_EDITOR_COLOR,
-											Color.BLACK),
-									intent.getBooleanExtra(
-											TextEditorActivity.EXTRA_EDITOR_BORDER,
-											false));
+					currentSelectedText.setText(txt,
+							intent.getIntExtra(
+									TextEditorActivity.EXTRA_EDITOR_COLOR,
+									Color.BLACK), intent.getBooleanExtra(
+									TextEditorActivity.EXTRA_EDITOR_BORDER,
+									false));
 					currentSelectedText = null;
 				}
 				break;
 			}
 		}
 	}
-
-	private Bitmap checkPhotoRotation(String path) throws IOException {
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inSampleSize = 4;
-
-		ExifInterface exif = new ExifInterface(path);
-		int exifOrientation = exif
-				.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-						ExifInterface.ORIENTATION_NORMAL);
-
-		int rotate = 0;
-
-		switch (exifOrientation) {
-		case ExifInterface.ORIENTATION_ROTATE_90:
-			rotate = 90;
-			break;
-
-		case ExifInterface.ORIENTATION_ROTATE_180:
-			rotate = 180;
-			break;
-
-		case ExifInterface.ORIENTATION_ROTATE_270:
-			rotate = 270;
-			break;
-		}
-
-		Bitmap bitmap = BitmapFactory.decodeFile(path, options);
-		if (rotate != 0) {
-			int w = bitmap.getWidth();
-			int h = bitmap.getHeight();
-
-			// Setting pre rotate
-			Matrix mtx = new Matrix();
-			mtx.preRotate(rotate);
-			bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
-			bitmap = bitmap.copy(Bitmap.Config.RGB_565, true);
-
-		}
-		return bitmap;
-
+	
+	private String getRealPathFromURI(Uri contentURI) {
+	    Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+	    if (cursor == null) { // Source is Dropbox or other similar local file path
+	        return contentURI.getPath();
+	    } else { 
+	        cursor.moveToFirst(); 
+	        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA); 
+	        return cursor.getString(idx); 
+	    }
 	}
 
 	private void clearImages() {
@@ -284,9 +234,11 @@ public class MainActivity extends Activity implements OnTextListener {
 	}
 
 	private PradaText currentSelectedText = null;
+	private PradaImage currentSelectedImage = null;
 
 	@Override
-	public void onModifyText(PradaText view, String text, int color, boolean hasStroke) {
+	public void onModifyText(PradaText view, String text, int color,
+			boolean hasStroke) {
 		Intent intent = new Intent(this, TextEditorActivity.class);
 		currentSelectedText = view;
 		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_TEXT, text);
@@ -319,5 +271,13 @@ public class MainActivity extends Activity implements OnTextListener {
 								dialog.dismiss();
 							}
 						}).show();
+	}
+
+	@Override
+	public void onModifyImage(PradaImage view) {
+		currentSelectedImage = view;
+		Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+		photoPickerIntent.setType("image/*");
+		startActivityForResult(photoPickerIntent, MODIFY_PHOTO);
 	}
 }

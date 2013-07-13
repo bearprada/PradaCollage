@@ -1,5 +1,6 @@
 package com.thuytrinh.multitouchlistener;
 
+import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
@@ -61,10 +62,18 @@ public class MultiTouchListener implements OnTouchListener {
     public boolean isScaleEnabled = true;
     public float minimumScale = 0.5f;
     public float maximumScale = 10.0f;
+	private GestureDetector mGestureDetector;
 
-    public MultiTouchListener() {
+    @SuppressWarnings("deprecation")
+	public MultiTouchListener() {
         mScaleGestureDetector = new ScaleGestureDetector(new ScaleGestureListener());
     }
+    
+    public MultiTouchListener(GestureDetector.SimpleOnGestureListener listener) {
+        mScaleGestureDetector = new ScaleGestureDetector(new ScaleGestureListener());
+        mGestureDetector = new GestureDetector(listener);
+    }
+    
 
     @Override
     public boolean onTouch(View view, MotionEvent event) {
@@ -126,7 +135,10 @@ public class MultiTouchListener implements OnTouchListener {
                 break;
             }
         }
-        return false;
+        if(mGestureDetector!=null)
+        	mGestureDetector.onTouchEvent(event);
+        
+        return true;
     }
 
     private static float adjustAngle(float degrees) {

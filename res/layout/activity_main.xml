@@ -25,9 +25,15 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" >
         </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/frame_sticks"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" >
+        </RelativeLayout>
     </RelativeLayout>
 
-    <Button
+    <ImageButton
         android:id="@+id/btnAddText"
         android:layout_width="48sp"
         android:layout_height="48sp"
@@ -35,28 +41,28 @@
         android:layout_alignParentLeft="true"
         android:background="@drawable/add_text" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btnSave"
         android:layout_width="48sp"
         android:layout_height="48sp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/save" />
+        android:src="@drawable/save" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btnAddPic"
         android:layout_width="48sp"
         android:layout_height="48sp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:background="@drawable/add" />
+        android:src="@drawable/add" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btnAddGlasses"
         android:layout_width="48sp"
         android:layout_height="48sp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/glasses" />
+        android:src="@drawable/glasses" />
 
 </RelativeLayout>

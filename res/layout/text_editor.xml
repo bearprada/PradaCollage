@@ -8,23 +8,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="#FFFFFF" >
 
-    <EditText
-        android:id="@+id/editText1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:ems="10" />
-
-    <Button
-        android:id="@+id/btnFinish"
-        android:layout_width="48sp"
-        android:layout_height="48sp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/ok" />
-
     <afzkl.development.mColorPicker.views.ColorPickerView
         android:id="@+id/colorPickerView1"
         android:layout_width="wrap_content"
@@ -32,12 +15,43 @@
         android:layout_alignLeft="@+id/editText1"
         android:layout_below="@+id/editText1" />
 
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/colorPickerView1"
+        android:textSize="20sp"
+        android:textColor="#000000"
+        android:text="@string/has_stroke" />
+
     <CheckBox
         android:id="@+id/checkBoxHasStroke"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/colorPickerView1"
-        android:layout_below="@+id/colorPickerView1"
-        android:text="@string/has_stroke"/>
+        android:layout_alignBaseline="@+id/textView1"
+        android:layout_alignBottom="@+id/textView1"
+        android:layout_toRightOf="@+id/textView1"
+        android:text="@string/has_stroke" />
+
+    <Button
+        android:id="@+id/btnFinish"
+        android:layout_width="48sp"
+        android:layout_height="48sp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/ok" />
+
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/btnFinish"
+        android:layout_below="@+id/btnFinish"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
 
 </RelativeLayout>

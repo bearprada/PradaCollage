@@ -10,11 +10,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
-public class TextEditorActivity extends Activity implements OnColorChangedListener {
+public class TextEditorActivity extends Activity {
 	
 	private AQuery aq;
 	private ColorPickerView cp;
-	private int currentSelectColor;
 	
 	public final static int TYPE_NEW = 0;
 	public final static int TYPE_UPDATE = 1;
@@ -22,16 +21,14 @@ public class TextEditorActivity extends Activity implements OnColorChangedListen
 	public final static String EXTRA_EDITOR_TEXT = "text";
 	public final static String EXTRA_EDITOR_COLOR = "color";
 	public final static String EXTRA_EDITOR_BORDER = "border";
-	//public final static String EXTRA_EDITOR_FONT = "font"; //TODO set the border 
+	//public final static String EXTRA_EDITOR_FONT = "font"; //TODO set the font type
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.text_editor);
-		//TODO check the extra ... if it's empty that means new a textview
 		aq = new AQuery(this);
 		cp = (ColorPickerView) aq.find(R.id.colorPickerView1).getView();
-		cp.setOnColorChangedListener(this);
 		aq.find(R.id.btnFinish).clicked(this, "clickFinish");
 		switch(getIntent().getIntExtra(EXTRA_EDITOR_TYPE, TYPE_NEW)){
 		case TYPE_NEW:
@@ -48,16 +45,11 @@ public class TextEditorActivity extends Activity implements OnColorChangedListen
 	public void clickFinish(View button){
 	    Bundle bundle = new Bundle();  
 	    bundle.putString(EXTRA_EDITOR_TEXT, aq.find(R.id.editText1).getEditText().getText().toString());  
-	    bundle.putInt(EXTRA_EDITOR_COLOR, currentSelectColor);
+	    bundle.putInt(EXTRA_EDITOR_COLOR, cp.getColor());
 	    bundle.putBoolean(EXTRA_EDITOR_BORDER, aq.find(R.id.checkBoxHasStroke).isChecked());
 	    Intent intent = new Intent();  
 	    intent.putExtras(bundle);
 	    setResult(RESULT_OK, intent);
 		finish();
-	}
-
-	@Override
-	public void onColorChanged(int color) {
-		currentSelectColor = color;
 	}
 }

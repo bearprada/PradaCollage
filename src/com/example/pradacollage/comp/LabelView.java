@@ -21,36 +21,25 @@ public class LabelView extends View implements PradaText {
 	private boolean hasStroke = false;
 	private OnTextListener listener;
 
-	private GestureDetector gestureDetector;
-
 	public LabelView(Context context, OnTextListener listener) {
 		super(context);
 		this.listener = listener;
 		initLabelView();
-		this.setOnTouchListener(new MultiTouchListener());
-		gestureDetector = new GestureDetector(context,
-				new GestureListener());
-	}
-
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		return gestureDetector.onTouchEvent(event);
+		this.setOnTouchListener(new MultiTouchListener(new GestureListener()));
 	}
 
 	private void initLabelView() {
-		Typeface tf = Typeface.create("Helvetica",Typeface.BOLD);
+		//Typeface tf = Typeface.create("Helvetica",Typeface.BOLD);
 		mTextPaint = new Paint();
 		mTextPaint.setTextSize(30);
-		mTextPaint.setTypeface(tf);
+		//mTextPaint.setTypeface(tf);
 		mTextPaint.setColor(0xFF000000);
 		strokePaint = new Paint();
-		strokePaint.setTextSize(24);
+		strokePaint.setTextSize(30);
 		strokePaint.setStyle(Style.STROKE);
 		strokePaint.setColor(Color.BLACK);
 		strokePaint.setStrokeWidth(2);
-		strokePaint.setTypeface(tf);
-
-		//setPadding(3, 3, 3, 3);
+		//strokePaint.setTypeface(tf);
 	}
 
 	private void setText(String str) {
@@ -150,10 +139,11 @@ public class LabelView extends View implements PradaText {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		canvas.drawColor(Color.TRANSPARENT);
-		/*if (hasStroke) {
+		if (hasStroke) {
 			canvas.drawText(mText, getPaddingLeft(), getPaddingTop() - mAscent,
 					this.strokePaint);
-		}*/
+		}
+		Log.d("TEST","------- "+mTextPaint.getColor());
 		canvas.drawText(mText, getPaddingLeft(), getPaddingTop() - mAscent,
 				mTextPaint);
 	}
@@ -161,6 +151,7 @@ public class LabelView extends View implements PradaText {
 	@Override
 	public void setText(String text, int color, boolean hasStroke) {
 		this.hasStroke = hasStroke;
+		Log.d("TEST","---------- set color " + color);
 		setTextColor(color);
 		setText(text);
 

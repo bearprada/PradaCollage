@@ -34,4 +34,7 @@ public class Constants {
 			layout = new Vector<Rect>(num);
 		}
 	}
+	public final static float SMALL_SCALE_FACTOR = 0.4F;
+	public final static float MEDIUM_SCALE_FACTOR = 0.6F;
+	public final static int BITMAP_SAMPLE_SIZE= 4;
 }
