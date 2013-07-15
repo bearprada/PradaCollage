@@ -1,9 +1,6 @@
 package com.example.pradacollage;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-
 import com.androidquery.AQuery;
 import com.example.pradacollage.comp.PradaImage;
 import com.example.pradacollage.comp.PradaImage.OnImageListener;
@@ -27,7 +24,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.view.Menu;
 import android.view.View;

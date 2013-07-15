@@ -5,12 +5,12 @@ import java.util.Random;
 import com.example.pradacollage.R;
 import com.example.pradacollage.comp.PradaImage;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.media.FaceDetector;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -67,6 +67,7 @@ public class GlassDetector {
 		}
 	}
 
+	@SuppressLint("NewApi")
 	private void addGlasses(int x1, int y1, int x2, int y2, View view) {
 		PradaImage iv = new PradaImage(ctx,null);
 		iv.setImageResource(GLASSES_RES_LIST[random.nextInt(GLASSES_RES_LIST.length)]);

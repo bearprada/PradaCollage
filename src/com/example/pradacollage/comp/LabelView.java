@@ -2,12 +2,12 @@ package com.example.pradacollage.comp;
 
 import com.thuytrinh.multitouchlistener.MultiTouchListener;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.graphics.Typeface;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -16,6 +16,7 @@ import android.view.View;
 public class LabelView extends View implements PradaText {
 	private Paint mTextPaint, strokePaint;
 
+	public final static int DEFAULT_FONT_SIZE = 100;
 	private String mText;
 	private int mAscent;
 	private boolean hasStroke = false;
@@ -31,11 +32,11 @@ public class LabelView extends View implements PradaText {
 	private void initLabelView() {
 		//Typeface tf = Typeface.create("Helvetica",Typeface.BOLD);
 		mTextPaint = new Paint();
-		mTextPaint.setTextSize(30);
+		mTextPaint.setTextSize(DEFAULT_FONT_SIZE);
 		//mTextPaint.setTypeface(tf);
 		mTextPaint.setColor(0xFF000000);
 		strokePaint = new Paint();
-		strokePaint.setTextSize(30);
+		strokePaint.setTextSize(DEFAULT_FONT_SIZE);
 		strokePaint.setStyle(Style.STROKE);
 		strokePaint.setColor(Color.BLACK);
 		strokePaint.setStrokeWidth(2);
@@ -92,8 +93,8 @@ public class LabelView extends View implements PradaText {
 			result = specSize;
 		} else {
 			// Measure the text
-			result = (int) mTextPaint.measureText(mText) + getPaddingLeft()
-					+ getPaddingRight();
+			result = (int) (mTextPaint.measureText(mText)) + getPaddingLeft()
+					+ getPaddingRight();//FIXME
 			if (specMode == MeasureSpec.AT_MOST) {
 				// Respect AT_MOST value if that was what is called for by
 				// measureSpec
@@ -164,6 +165,7 @@ public class LabelView extends View implements PradaText {
 		return this;
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public void setXY(int x, int y) {
 		setX(x);
