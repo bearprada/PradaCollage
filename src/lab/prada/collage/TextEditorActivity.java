@@ -1,4 +1,4 @@
-package com.example.pradacollage;
+package lab.prada.collage;
 
 import com.androidquery.AQuery;
 

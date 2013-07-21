@@ -1,17 +1,18 @@
-package com.example.pradacollage.util;
+package lab.prada.collage.util;
 
 import java.io.IOException;
 
-import com.example.pradacollage.Constants;
+import lab.prada.collage.Constants;
+
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 
-public class CameraImageTranslator {
+public class CameraImageHelper {
 	
-	public static Bitmap checkPhotoRotation(String path) throws IOException {
+	public static Bitmap checkAndRotatePhoto(String path) throws IOException {
 
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inSampleSize = Constants.BITMAP_SAMPLE_SIZE;

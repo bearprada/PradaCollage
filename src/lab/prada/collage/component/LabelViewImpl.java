@@ -1,6 +1,4 @@
-package com.example.pradacollage.comp;
-
-import com.thuytrinh.multitouchlistener.MultiTouchListener;
+package lab.prada.collage.component;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -9,24 +7,16 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 
-public class LabelView extends View implements PradaText {
+public class LabelViewImpl extends BaseLabelView {
 	private Paint mTextPaint, strokePaint;
 
-	public final static int DEFAULT_FONT_SIZE = 100;
-	private String mText;
-	private int mAscent;
-	private boolean hasStroke = false;
-	private OnTextListener listener;
 
-	public LabelView(Context context, OnTextListener listener) {
+
+	public LabelViewImpl(Context context) {
 		super(context);
-		this.listener = listener;
 		initLabelView();
-		this.setOnTouchListener(new MultiTouchListener(new GestureListener()));
 	}
 
 	private void initLabelView() {
@@ -172,21 +162,8 @@ public class LabelView extends View implements PradaText {
 		setY(y);
 	}
 
-	private class GestureListener extends
-			GestureDetector.SimpleOnGestureListener {
-
-		@Override
-		public boolean onDown(MotionEvent e) {
-			return true;
-		}
-
-		@Override
-		public boolean onDoubleTap(MotionEvent e) {
-			if (listener != null)
-				listener.onModifyText(LabelView.this, mText,
-						mTextPaint.getColor(), hasStroke);
-			return true;
-		}
+	@Override
+	public int getTextColor() {
+		return mTextPaint.getColor();
 	}
-
 }

@@ -1,10 +1,11 @@
-package com.example.pradacollage.util;
+package lab.prada.collage.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
-import com.example.pradacollage.Constants;
+import lab.prada.collage.Constants;
+
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -18,7 +19,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ImageStorageHelper {
+public class StoreImageHelper {
 	
 	public interface onSaveListener { 
 		public void onSaveSuccess();

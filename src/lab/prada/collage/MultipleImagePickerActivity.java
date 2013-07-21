@@ -1,4 +1,4 @@
-package com.example.pradacollage;
+package lab.prada.collage;
 
 import java.util.ArrayList;
 import java.util.Enumeration;

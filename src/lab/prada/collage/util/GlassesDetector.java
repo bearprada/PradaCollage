@@ -1,9 +1,12 @@
-package com.example.pradacollage.util;
+package lab.prada.collage.util;
 
 import java.util.Random;
 
-import com.example.pradacollage.R;
-import com.example.pradacollage.comp.PradaImage;
+import lab.prada.collage.R;
+import lab.prada.collage.component.ComponentFactory;
+import lab.prada.collage.component.PhotoView;
+import lab.prada.collage.component.StickerView;
+
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -16,7 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-public class GlassDetector {
+public class GlassesDetector {
 	private Context ctx;
 	private ViewGroup root;
 
@@ -27,7 +30,7 @@ public class GlassDetector {
 
 	public static final int MAX_FACES = 10;
 
-	public GlassDetector(Context ctx, ViewGroup root) {
+	public GlassesDetector(Context ctx, ViewGroup root) {
 		this.root = root;
 		this.ctx = ctx;
 	}
@@ -69,19 +72,20 @@ public class GlassDetector {
 
 	@SuppressLint("NewApi")
 	private void addGlasses(int x1, int y1, int x2, int y2, View view) {
-		PradaImage iv = new PradaImage(ctx,null);
-		iv.setImageResource(GLASSES_RES_LIST[random.nextInt(GLASSES_RES_LIST.length)]);
+		//StickerView sticker = ComponentFactory.createSticker(ctx);
+		StickerView sticker = ComponentFactory.create(ComponentFactory.COMPONENT_STICKER, ctx);
+		sticker.setImageResource(GLASSES_RES_LIST[random.nextInt(GLASSES_RES_LIST.length)]);
 		int w = Math.abs(x2 - x1);
 		int h = w / 2;// FIXME
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(w, h);
 		params.leftMargin = x1 + view.getLeft();
 		params.topMargin = y1 + view.getTop();
-		iv.setLayoutParams(params);
-		iv.setRotation(view.getRotation());
-		iv.setTranslationX(view.getTranslationX());
-		iv.setTranslationY(view.getTranslationY());
-		iv.setScaleX(view.getScaleX());
-		iv.setScaleY(view.getScaleY());
-		root.addView(iv);
+		sticker.setLayoutParams(params);
+		sticker.setRotation(view.getRotation());
+		sticker.setTranslationX(view.getTranslationX());
+		sticker.setTranslationY(view.getTranslationY());
+		sticker.setScaleX(view.getScaleX());
+		sticker.setScaleY(view.getScaleY());
+		root.addView(sticker);
 	}
 }

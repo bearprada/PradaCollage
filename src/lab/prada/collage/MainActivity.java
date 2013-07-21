@@ -1,16 +1,18 @@
-package com.example.pradacollage;
+package lab.prada.collage;
 
 import java.io.IOException;
+
+import lab.prada.collage.component.BaseLabelView;
+import lab.prada.collage.component.ComponentFactory;
+import lab.prada.collage.component.PhotoView;
+import lab.prada.collage.component.BaseLabelView.OnLabelListener;
+import lab.prada.collage.component.PhotoView.OnPhotoListener;
+import lab.prada.collage.util.CameraImageHelper;
+import lab.prada.collage.util.GlassesDetector;
+import lab.prada.collage.util.StoreImageHelper;
+import lab.prada.collage.util.StoreImageHelper.onSaveListener;
+
 import com.androidquery.AQuery;
-import com.example.pradacollage.comp.PradaImage;
-import com.example.pradacollage.comp.PradaImage.OnImageListener;
-import com.example.pradacollage.comp.PradaText;
-import com.example.pradacollage.comp.PradaText.OnTextListener;
-import com.example.pradacollage.comp.PradaTextFactory;
-import com.example.pradacollage.util.CameraImageTranslator;
-import com.example.pradacollage.util.GlassDetector;
-import com.example.pradacollage.util.ImageStorageHelper;
-import com.example.pradacollage.util.ImageStorageHelper.onSaveListener;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,8 +32,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-public class MainActivity extends Activity implements OnTextListener,
-		OnImageListener {
+public class MainActivity extends Activity implements OnLabelListener,
+		OnPhotoListener {
 
 	private static final int SELECT_PHOTO = 0;
 	private static final int ADD_NEW_TEXT = 1;
@@ -41,8 +43,8 @@ public class MainActivity extends Activity implements OnTextListener,
 	private AQuery aq;
 	private ProgressDialog progressDialog;
 	private ViewGroup allViews;
-	private ViewGroup textViews;
-	private ViewGroup imageViews;
+	private ViewGroup textPanel;
+	private ViewGroup photoPanel;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +56,8 @@ public class MainActivity extends Activity implements OnTextListener,
 		aq.find(R.id.btnAddText).clicked(this, "clickAddText");
 		aq.find(R.id.btnAddGlasses).clicked(this, "clickAddGlasses");
 		allViews = (ViewGroup) aq.find(R.id.frame).getView();
-		textViews = (ViewGroup) aq.find(R.id.frame_texts).getView();
-		imageViews = (ViewGroup) aq.find(R.id.frame_images).getView();
+		textPanel = (ViewGroup) aq.find(R.id.frame_texts).getView();
+		photoPanel = (ViewGroup) aq.find(R.id.frame_images).getView();
 	}
 
 	private void showProgressDialog(boolean enable) {
@@ -73,7 +75,7 @@ public class MainActivity extends Activity implements OnTextListener,
 
 	public void clickSave(View button) {
 		showProgressDialog(true);
-		ImageStorageHelper.save(getContentResolver(), allViews,
+		StoreImageHelper.save(getContentResolver(), allViews,
 				new onSaveListener() {
 					@Override
 					public void onSaveSuccess() {
@@ -99,7 +101,7 @@ public class MainActivity extends Activity implements OnTextListener,
 		 * @Override public void run() {
 		 */
 		cleanSticks();
-		GlassDetector detector = new GlassDetector(MainActivity.this,
+		GlassesDetector detector = new GlassesDetector(MainActivity.this,
 				(ViewGroup) aq.find(R.id.frame_sticks).getView());
 		detector.detectFaces((ViewGroup) aq.find(R.id.frame_images).getView());
 		/*
@@ -122,42 +124,43 @@ public class MainActivity extends Activity implements OnTextListener,
 						.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
 				if (paths.length > 0) {
 					clearImages();
-					int gapX = imageViews.getWidth()
+					int gapX = photoPanel.getWidth()
 							/ Constants.SUPPORTED_FRAME_WIDTH;
-					int gapY = imageViews.getHeight()
+					int gapY = photoPanel.getHeight()
 							/ Constants.SUPPORTED_FRAME_HEIGHT;
 					int x, y;
 					// ImageView iv;
-					PradaImage iv;
+					PhotoView iv;
 
 					for (int i = 0; i < paths.length; i++) {
 						x = (i % Constants.SUPPORTED_FRAME_WIDTH) * gapX;
 						y = (i / Constants.SUPPORTED_FRAME_WIDTH) * gapY;
 
-						// iv = new ImageView(this);
-						iv = new PradaImage(this, this);
+						//iv = ComponentFactory.createImage(this, this);
+						iv = ComponentFactory.create(ComponentFactory.COMPONENT_IMAGE, this);
+						iv.setListener(this);
 						try {
-							iv.setImageBitmap(CameraImageTranslator
-									.checkPhotoRotation(paths[i]));
+							iv.setImageBitmap(CameraImageHelper
+									.checkAndRotatePhoto(paths[i]));
 							RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
 									gapX, gapY);
 							params.setMargins(x, y, 0, 0);
 							iv.setLayoutParams(params);
-							imageViews.addView(iv);
+							photoPanel.addView(iv);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 
 					}
-					imageViews.invalidate();
+					photoPanel.invalidate();
 				}
 				break;
 			case MODIFY_PHOTO:
 				if (currentSelectedImage != null) {
 					try {
-						Bitmap bitmap = CameraImageTranslator.checkPhotoRotation(getRealPathFromURI(intent.getData()));
+						Bitmap bitmap = CameraImageHelper.checkAndRotatePhoto(getRealPathFromURI(intent.getData()));
 						if(bitmap!=null){
-							currentSelectedImage.setImageBitmap(bitmap);
+							currentSelectedImage.setImage(bitmap);
 						}
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -207,15 +210,17 @@ public class MainActivity extends Activity implements OnTextListener,
 	}
 
 	private void clearImages() {
-		imageViews.removeAllViews();
+		photoPanel.removeAllViews();
 	}
 
 	@SuppressLint("NewApi")
 	private void addTextView(String text, int color, boolean hasStroke) {
-		PradaText tv = PradaTextFactory.create(this, this);
-		tv.setXY(textViews.getWidth() / 2, textViews.getHeight() / 2);
+		//BaseLabelView tv = ComponentFactory.createText(this, this);
+		BaseLabelView tv = ComponentFactory.create(ComponentFactory.COMPONENT_LABEL, this);
+		tv.setListener(this);
+		tv.setXY(textPanel.getWidth() / 2, textPanel.getHeight() / 2);
 		tv.setText(text, color, hasStroke);
-		textViews.addView(tv.getView());
+		textPanel.addView(tv.getView());
 	}
 
 	public void clickAddText(View button) {
@@ -229,11 +234,11 @@ public class MainActivity extends Activity implements OnTextListener,
 		return true;
 	}
 
-	private PradaText currentSelectedText = null;
-	private PradaImage currentSelectedImage = null;
+	private BaseLabelView currentSelectedText = null;
+	private PhotoView currentSelectedImage = null;
 
 	@Override
-	public void onModifyText(PradaText view, String text, int color,
+	public void onModifyLabel(BaseLabelView view, String text, int color,
 			boolean hasStroke) {
 		Intent intent = new Intent(this, TextEditorActivity.class);
 		currentSelectedText = view;
@@ -270,7 +275,7 @@ public class MainActivity extends Activity implements OnTextListener,
 	}
 
 	@Override
-	public void onModifyImage(PradaImage view) {
+	public void onModifyPhoto(PhotoView view) {
 		currentSelectedImage = view;
 		Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
 		photoPickerIntent.setType("image/*");
