@@ -1,22 +1,5 @@
 package lab.prada.collage;
 
-import java.io.IOException;
-
-import lab.prada.collage.component.BaseLabelView;
-import lab.prada.collage.component.ComponentFactory;
-import lab.prada.collage.component.PhotoView;
-import lab.prada.collage.component.BaseLabelView.OnLabelListener;
-import lab.prada.collage.component.PhotoView.OnPhotoListener;
-import lab.prada.collage.util.CameraImageHelper;
-import lab.prada.collage.util.GlassesDetector;
-import lab.prada.collage.util.StoreImageHelper;
-import lab.prada.collage.util.StoreImageHelper.onSaveListener;
-
-import com.androidquery.AQuery;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -27,10 +10,29 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+
+import com.androidquery.AQuery;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
+
+import lab.prada.collage.component.BaseLabelView;
+import lab.prada.collage.component.BaseLabelView.OnLabelListener;
+import lab.prada.collage.component.ComponentFactory;
+import lab.prada.collage.component.PhotoView;
+import lab.prada.collage.component.PhotoView.OnPhotoListener;
+import lab.prada.collage.util.CameraImageHelper;
+import lab.prada.collage.util.GlassesDetector;
+import lab.prada.collage.util.StoreImageHelper;
+import lab.prada.collage.util.StoreImageHelper.onSaveListener;
 
 public class MainActivity extends Activity implements OnLabelListener,
 		OnPhotoListener {
@@ -122,6 +124,9 @@ public class MainActivity extends Activity implements OnLabelListener,
 			case SELECT_PHOTO:
 				String[] paths = intent
 						.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
+
+				ArrayList<PhotoView> photos = new ArrayList<PhotoView>();
+
 				if (paths.length > 0) {
 					clearImages();
 					int gapX = photoPanel.getWidth()
@@ -132,26 +137,60 @@ public class MainActivity extends Activity implements OnLabelListener,
 					// ImageView iv;
 					PhotoView iv;
 
+					Random rand = new Random();
+					int[] x_pos = {1, 0, 2};
+					int[] y_pos = {2, 3, 1, 0};
+
 					for (int i = 0; i < paths.length; i++) {
-						x = (i % Constants.SUPPORTED_FRAME_WIDTH) * gapX;
-						y = (i / Constants.SUPPORTED_FRAME_WIDTH) * gapY;
+						//x = (i % Constants.SUPPORTED_FRAME_WIDTH) * gapX;
+						//y = (i / Constants.SUPPORTED_FRAME_WIDTH) * gapY;
+						y = y_pos[i % 4] * gapY;
+						x = x_pos[i % Constants.SUPPORTED_FRAME_WIDTH] * gapX;
 
 						//iv = ComponentFactory.createImage(this, this);
 						iv = ComponentFactory.create(ComponentFactory.COMPONENT_IMAGE, this);
 						iv.setListener(this);
+
 						try {
+							// angle
+							if (i%5 <= 2) {
+								iv.setRotation(30*(i%5));
+							} else {
+								iv.setRotation(360 - 30*(i%5 - 2));
+							}
+
+							//size
+							float a = 1 + (12 - (float)paths.length)/12;
+							float b = 1 + (12 - (float)paths.length)/12;
+							iv.setScaleX(a);
+							iv.setScaleY(b);
+
 							iv.setImageBitmap(CameraImageHelper
 									.checkAndRotatePhoto(paths[i]));
 							RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
 									gapX, gapY);
 							params.setMargins(x, y, 0, 0);
 							iv.setLayoutParams(params);
-							photoPanel.addView(iv);
+							iv.set_pos(x, y);
+							photos.add(iv);
+							//photoPanel.addView(iv);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 
 					}
+
+					int num = 0;
+					while (num <= 4) {
+						for (int i = 0; i < photos.size(); i++) {
+							PhotoView temp = photos.get(i);
+							if (temp.get_y_val() == num*gapY) {
+								photoPanel.addView(temp);
+							}
+						}
+						num = num + 1;
+					}
+
 					photoPanel.invalidate();
 				}
 				break;

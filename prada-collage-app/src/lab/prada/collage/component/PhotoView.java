@@ -1,13 +1,13 @@
 package lab.prada.collage.component;
 
-import com.thuytrinh.multitouchlistener.MultiTouchListener;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.thuytrinh.multitouchlistener.MultiTouchListener;
 
 public class PhotoView extends ImageView implements BaseComponent {
 
@@ -59,4 +59,20 @@ public class PhotoView extends ImageView implements BaseComponent {
 		setX(x);
 		setY(y);
 	}
+
+	public void set_pos(int x, int y) {
+		x_val = x;
+		y_val = y;
+	}
+
+	public int get_x_val() {
+		return x_val;
+	}
+
+	public int get_y_val() {
+		return y_val;
+	}
+
+	private int x_val;
+	private int y_val;
 }
