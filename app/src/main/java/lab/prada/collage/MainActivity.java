@@ -19,11 +19,14 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.androidquery.AQuery;
+import com.nostra13.universalimageloader.utils.CollageUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
+import lab.prada.collage.component.BaseComponent;
 import lab.prada.collage.component.BaseLabelView;
 import lab.prada.collage.component.BaseLabelView.OnLabelListener;
 import lab.prada.collage.component.ComponentFactory;
@@ -34,8 +37,7 @@ import lab.prada.collage.util.GlassesDetector;
 import lab.prada.collage.util.StoreImageHelper;
 import lab.prada.collage.util.StoreImageHelper.onSaveListener;
 
-public class MainActivity extends Activity implements OnLabelListener,
-		OnPhotoListener {
+public class MainActivity extends Activity implements OnLabelListener, OnPhotoListener {
 
 	private static final int SELECT_PHOTO = 0;
 	private static final int ADD_NEW_TEXT = 1;
@@ -125,74 +127,29 @@ public class MainActivity extends Activity implements OnLabelListener,
 				String[] paths = intent
 						.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
 
-				ArrayList<PhotoView> photos = new ArrayList<PhotoView>();
-
-				if (paths.length > 0) {
-					clearImages();
-					int gapX = photoPanel.getWidth()
-							/ Constants.SUPPORTED_FRAME_WIDTH;
-					int gapY = photoPanel.getHeight()
-							/ Constants.SUPPORTED_FRAME_HEIGHT;
-					int x, y;
-					// ImageView iv;
-					PhotoView iv;
-
-					Random rand = new Random();
-					int[] x_pos = {1, 0, 2};
-					int[] y_pos = {2, 3, 1, 0};
-
-					for (int i = 0; i < paths.length; i++) {
-						//x = (i % Constants.SUPPORTED_FRAME_WIDTH) * gapX;
-						//y = (i / Constants.SUPPORTED_FRAME_WIDTH) * gapY;
-						y = y_pos[i % 4] * gapY;
-						x = x_pos[i % Constants.SUPPORTED_FRAME_WIDTH] * gapX;
-
-						//iv = ComponentFactory.createImage(this, this);
-						iv = ComponentFactory.create(ComponentFactory.COMPONENT_IMAGE, this);
-						iv.setListener(this);
-
-						try {
-							// angle
-							if (i%5 <= 2) {
-								iv.setRotation(30*(i%5));
-							} else {
-								iv.setRotation(360 - 30*(i%5 - 2));
-							}
-
-							//size
-							float a = 1 + (12 - (float)paths.length)/12;
-							float b = 1 + (12 - (float)paths.length)/12;
-							iv.setScaleX(a);
-							iv.setScaleY(b);
-
-							iv.setImageBitmap(CameraImageHelper
-									.checkAndRotatePhoto(paths[i]));
-							RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-									gapX, gapY);
-							params.setMargins(x, y, 0, 0);
-							iv.setLayoutParams(params);
-							iv.set_pos(x, y);
-							photos.add(iv);
-							//photoPanel.addView(iv);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
-					}
-
-					int num = 0;
-					while (num <= 4) {
-						for (int i = 0; i < photos.size(); i++) {
-							PhotoView temp = photos.get(i);
-							if (temp.get_y_val() == num*gapY) {
-								photoPanel.addView(temp);
-							}
-						}
-						num = num + 1;
-					}
-
-					photoPanel.invalidate();
+				if (paths.length <= 0) {
+					return;
 				}
+				List<CollageUtils.ScrapTransform> trans = CollageUtils.generateScrapsTransform(photoPanel.getWidth(), photoPanel.getHeight(), paths.length);
+				clearImages();
+				int i = 0;
+				for (CollageUtils.ScrapTransform t : trans) {
+					PhotoView iv = ComponentFactory.create(ComponentFactory.COMPONENT_IMAGE, this);
+					iv.setListener(this);
+
+					try {
+						// angle
+						iv.setRotation(t.rotation);
+						iv.setScaleX(t.scaleX);
+						iv.setScaleY(t.scaleY);
+
+						iv.setImageBitmap(CameraImageHelper
+								.checkAndRotatePhoto(paths[i++]));
+						iv.setXY(t.centerX, t.centerY);
+						photoPanel.addView(iv);
+					} catch (IOException e) {}
+				}
+				photoPanel.invalidate();
 				break;
 			case MODIFY_PHOTO:
 				if (currentSelectedImage != null) {

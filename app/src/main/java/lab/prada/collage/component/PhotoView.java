@@ -12,7 +12,7 @@ import com.thuytrinh.multitouchlistener.MultiTouchListener;
 public class PhotoView extends ImageView implements BaseComponent {
 
 	public interface OnPhotoListener {
-		public void onModifyPhoto(PhotoView view);
+		void onModifyPhoto(PhotoView view);
 	}
 
 	private OnPhotoListener listener;
@@ -59,20 +59,4 @@ public class PhotoView extends ImageView implements BaseComponent {
 		setX(x);
 		setY(y);
 	}
-
-	public void set_pos(int x, int y) {
-		x_val = x;
-		y_val = y;
-	}
-
-	public int get_x_val() {
-		return x_val;
-	}
-
-	public int get_y_val() {
-		return y_val;
-	}
-
-	private int x_val;
-	private int y_val;
 }
