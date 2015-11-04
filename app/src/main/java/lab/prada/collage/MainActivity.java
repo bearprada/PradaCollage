@@ -16,17 +16,13 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import com.androidquery.AQuery;
-import com.nostra13.universalimageloader.utils.CollageUtils;
+import lab.prada.collage.util.CollageUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import lab.prada.collage.component.BaseComponent;
 import lab.prada.collage.component.BaseLabelView;
 import lab.prada.collage.component.BaseLabelView.OnLabelListener;
 import lab.prada.collage.component.ComponentFactory;

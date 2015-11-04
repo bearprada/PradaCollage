@@ -1,31 +1,17 @@
-package com.nostra13.universalimageloader.utils;
-
+package lab.prada.collage.util;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import lab.prada.collage.Constants;
 
 /**
  * Created by prada on 15/9/3.
  */
 public class CollageUtils {
     public static List<ScrapTransform> generateScrapsTransform(int screenWidth, int screenHeight, int scrapNum) {
-        int gapX = screenWidth / Constants.SUPPORTED_FRAME_WIDTH;
-        int gapY = screenHeight / Constants.SUPPORTED_FRAME_HEIGHT;
-        int[] x_pos = {1, 0, 2};
-        int[] y_pos = {2, 3, 1, 0};
         List<ScrapTransform> trans = new ArrayList<ScrapTransform>(scrapNum);
-
         for (int i = 0; i < scrapNum; i++) {
-            int y = y_pos[i % 4] * gapY;
-            int x = x_pos[i % Constants.SUPPORTED_FRAME_WIDTH] * gapX;
-            float rotation = (i%5 <= 2) ? 30*(i%5) : 360 - 30*(i%5 - 2);
-            //size
-            float sx = 1 + (12 - (float)scrapNum)/12;
-            float sy = 1 + (12 - (float)scrapNum)/12;
-            trans.add(new ScrapTransform(x, y, rotation, sx, sy));
-
+            trans.add(new ScrapTransform(screenWidth / 2, screenHeight / 2, 0, 1, 1));
         }
         return trans;
     }
