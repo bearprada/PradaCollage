@@ -2,12 +2,11 @@ package lab.prada.collage;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 
-public class SplashActivity extends BaseActivity implements AnimationListener {
+public class SplashActivity extends BaseActivity {
 
 	static {
 		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -17,25 +16,18 @@ public class SplashActivity extends BaseActivity implements AnimationListener {
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
-		Animation animation = AnimationUtils.loadAnimation(this, R.anim.splash);
-		animation.setAnimationListener(this);
-		findViewById(R.id.imgSplash).startAnimation(animation);
-	}
 
-	@Override
-	public void onAnimationEnd(Animation animation) {
-		Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-		SplashActivity.this.startActivity(intent);
-		SplashActivity.this.finish();
-	}
-
-	@Override
-	public void onAnimationRepeat(Animation arg0) {
-		//do nothing
-	}
-
-	@Override
-	public void onAnimationStart(Animation arg0) {
-		//do nothing
+		ImageView splashImage = (ImageView) findViewById(R.id.img_splash);
+		ViewCompat.setAlpha(splashImage, 0f);
+		ViewCompat.animate(splashImage)
+			.setDuration(1500)
+			.alpha(1f)
+			.withEndAction(new Runnable() {
+				@Override
+				public void run() {
+					startActivity(new Intent(SplashActivity.this, MainActivity.class));
+					finish();
+				}
+			}).start();
 	}
 }

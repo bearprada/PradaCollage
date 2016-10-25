@@ -34,4 +34,6 @@ dependencies {
     compile "com.android.support:gridlayout-v7:${googleSupportLibVer}"
     compile "com.android.support:design:${googleSupportLibVer}"
     compile "com.android.support:support-vector-drawable:${googleSupportLibVer}"
+
+    compile 'com.github.bumptech.glide:glide:3.6.1'
 }
