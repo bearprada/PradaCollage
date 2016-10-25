@@ -2,8 +2,6 @@
 <resources>
 
     <string name="app_name">PradaCollage</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
     <string name="title_activity_multiple_image_picker">Selected Images</string>
     <string name="over_num_of_images">Over the Number of Images You Selectedf.</string>
     <string name="dialog_exit_title">Don not Say good bye for Prada Collage</string>
@@ -13,6 +11,5 @@
     <string name="progress_title">progressing ...</string>
     <string name="progress_message">Please wait a moment</string>
     <string name="has_stroke">Has Stroke</string>
-    <string name="title_activity_test">TestActivity</string>
 
 </resources>

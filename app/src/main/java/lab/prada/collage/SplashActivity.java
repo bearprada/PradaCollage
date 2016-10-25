@@ -2,12 +2,17 @@ package lab.prada.collage;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 
 public class SplashActivity extends BaseActivity implements AnimationListener {
-	
+
+	static {
+		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);

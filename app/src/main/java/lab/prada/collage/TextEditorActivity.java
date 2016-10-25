@@ -1,9 +1,11 @@
 package lab.prada.collage;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -21,28 +23,19 @@ public class TextEditorActivity extends BaseActivity {
 	public final static String EXTRA_EDITOR_COLOR = "color";
 	public final static String EXTRA_EDITOR_BORDER = "border";
 	private EditText mEditText;
-	//public final static String EXTRA_EDITOR_FONT = "font"; //TODO set the font type
+    private CheckBox mHasStroke;
+    //public final static String EXTRA_EDITOR_FONT = "font"; //TODO set the font type
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.text_editor);
+		setContentView(R.layout.activity_text);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 		cp = (ColorPickerView) findViewById(R.id.colorPickerView1);
 		mEditText = (EditText) findViewById(R.id.editText1);
-		final CheckBox mHasStroke = (CheckBox) findViewById(R.id.checkBoxHasStroke);
-		findViewById(R.id.btnFinish).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Bundle bundle = new Bundle();
-				bundle.putString(EXTRA_EDITOR_TEXT, mEditText.getText().toString());
-				bundle.putInt(EXTRA_EDITOR_COLOR, cp.getColor());
-				bundle.putBoolean(EXTRA_EDITOR_BORDER, mHasStroke.isChecked());
-				Intent intent = new Intent();
-				intent.putExtras(bundle);
-				setResult(RESULT_OK, intent);
-				finish();
-			}
-		});
+		mHasStroke = (CheckBox) findViewById(R.id.checkBoxHasStroke);
 		switch(getIntent().getIntExtra(EXTRA_EDITOR_TYPE, TYPE_NEW)){
 		case TYPE_NEW:
 			// do nothing
@@ -54,4 +47,31 @@ public class TextEditorActivity extends BaseActivity {
 			break;
 		}
 	}
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.text, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            case R.id.action_choose:
+				Bundle bundle = new Bundle();
+				bundle.putString(EXTRA_EDITOR_TEXT, mEditText.getText().toString());
+				bundle.putInt(EXTRA_EDITOR_COLOR, cp.getColor());
+				bundle.putBoolean(EXTRA_EDITOR_BORDER, mHasStroke.isChecked());
+				Intent intent = new Intent();
+				intent.putExtras(bundle);
+				setResult(RESULT_OK, intent);
+				finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 }

@@ -13,6 +13,8 @@ android {
 
         testApplicationId "lab.prada.collage.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
+
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -31,4 +33,5 @@ dependencies {
     compile "com.android.support:recyclerview-v7:${googleSupportLibVer}"
     compile "com.android.support:gridlayout-v7:${googleSupportLibVer}"
     compile "com.android.support:design:${googleSupportLibVer}"
+    compile "com.android.support:support-vector-drawable:${googleSupportLibVer}"
 }
