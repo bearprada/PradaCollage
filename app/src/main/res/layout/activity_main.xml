@@ -11,48 +11,45 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize" />
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <RelativeLayout
+        <FrameLayout
             android:id="@+id/frame"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" >
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
-            <RelativeLayout
+            <FrameLayout
                 android:id="@+id/frame_images"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent" >
-            </RelativeLayout>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-            <RelativeLayout
+            <FrameLayout
                 android:id="@+id/frame_texts"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent" >
-            </RelativeLayout>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-            <RelativeLayout
+            <FrameLayout
                 android:id="@+id/frame_sticks"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent" >
-            </RelativeLayout>
-        </RelativeLayout>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
 
-        <ImageButton
+        <ImageView
             android:id="@+id/btnAddText"
-            android:layout_width="48sp"
-            android:layout_height="48sp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:background="@drawable/add_text" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="16dp"
+            android:background="@drawable/ic_text_fields_black_48dp" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/btnAddPic"
-            android:layout_width="48sp"
-            android:layout_height="48sp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/add" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_add_to_photos_black_48dp" />
 
-    </RelativeLayout>
+    </FrameLayout>
 </LinearLayout>

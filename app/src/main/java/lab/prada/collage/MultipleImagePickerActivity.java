@@ -1,6 +1,5 @@
 package lab.prada.collage;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -9,8 +8,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -31,7 +32,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-public class MultipleImagePickerActivity extends BaseActivity implements OnItemClickListener {
+public class MultipleImagePickerActivity extends BaseActivity {
 
 	protected static final String EXTRA_IMAGE_PICKER_IMAGE_PATH = "image_path";
 	private DisplayImageOptions options;
@@ -42,35 +43,25 @@ public class MultipleImagePickerActivity extends BaseActivity implements OnItemC
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_multiple_image_picker);
-		initImageLoader(this);
-		findViewById(R.id.btnOk).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Bundle bundle = new Bundle();
-				bundle.putStringArray(EXTRA_IMAGE_PICKER_IMAGE_PATH, adapter.getSelectedItems());
-				Intent intent = new Intent();
-				intent.putExtras(bundle);
-				setResult(RESULT_OK, intent);
-				finish();
-			}
-		});
-		findViewById(R.id.btnCancel).setOnClickListener(new View.OnClickListener() {
+		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-			@Override
-			public void onClick(View v) {
-				finish();
-			}
-		});
+		initImageLoader(this);
 		options = new DisplayImageOptions.Builder()
 				.showStubImage(R.drawable.ic_stub)
 				.showImageForEmptyUri(R.drawable.ic_empty)
 				.showImageOnFail(R.drawable.ic_error).cacheInMemory(true)
 				.cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
 		GridView listView = (GridView) findViewById(R.id.gridView);
-		
+
 		adapter = new ImageAdapter(getCameraImages(this));
 		listView.setAdapter(adapter);
-		listView.setOnItemClickListener(this);
+		listView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				adapter.selected(position);
+			}
+		});
 	}
 	
 	@Override
@@ -78,6 +69,7 @@ public class MultipleImagePickerActivity extends BaseActivity implements OnItemC
 		super.onDestroy();
 		adapter.dispose();
 	}
+
 	public static void initImageLoader(Context context) {
 		// This configuration tuning is custom. You can tune every option, you
 		// may tune some of them,
@@ -186,14 +178,26 @@ public class MultipleImagePickerActivity extends BaseActivity implements OnItemC
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.multiple_image_picker, menu);
 		return true;
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-		adapter.selected(position);
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case android.R.id.home:
+				finish();
+				return true;
+			case R.id.action_choose:
+				Bundle bundle = new Bundle();
+				bundle.putStringArray(EXTRA_IMAGE_PICKER_IMAGE_PATH, adapter.getSelectedItems());
+				Intent intent = new Intent();
+				intent.putExtras(bundle);
+				setResult(RESULT_OK, intent);
+				finish();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
 	}
-
 }
