@@ -22,7 +22,10 @@ import android.view.ViewGroup;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
+import bolts.Continuation;
+import bolts.Task;
 import lab.prada.collage.component.BaseLabelView;
 import lab.prada.collage.component.BaseLabelView.OnLabelListener;
 import lab.prada.collage.component.ComponentFactory;
@@ -89,19 +92,33 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 				List<CollageUtils.ScrapTransform> trans = CollageUtils.generateScrapsTransform(photoPanel.getWidth(), photoPanel.getHeight(), paths.size());
 				clearImages();
 				int i = 0;
+				final int baseWidth = photoPanel.getWidth() / 2;
 				for (CollageUtils.ScrapTransform t : trans) {
-					PhotoView iv = ComponentFactory.create(ComponentFactory.COMPONENT_IMAGE, this);
-					iv.setListener(this);
-
-					try {
-						// angle
-						ViewCompat.setRotation(iv, t.rotation);
-						ViewCompat.setScaleX(iv, t.scaleX);
-						ViewCompat.setScaleY(iv, t.scaleY);
-						iv.setImageBitmap(CameraImageHelper.checkAndRotatePhoto(paths.get(i++)));
-						iv.setXY(t.centerX, t.centerY);
-						photoPanel.addView(iv);
-					} catch (IOException e) {}
+					final String path = paths.get(i++);
+					final CollageUtils.ScrapTransform transform = t;
+					Task.callInBackground(new Callable<Bitmap>() {
+						@Override
+						public Bitmap call() throws Exception {
+							return CameraImageHelper.checkAndRotatePhoto(path);
+						}
+					}).onSuccess(new Continuation<Bitmap, PhotoView>() {
+						@Override
+						public PhotoView then(Task<Bitmap> task) throws Exception {
+							PhotoView iv = ComponentFactory.create(ComponentFactory.COMPONENT_IMAGE,
+																   MainActivity.this, photoPanel);
+							iv.setListener(MainActivity.this);
+							Bitmap bitmap = task.getResult();
+							// angle
+							ViewCompat.setRotation(iv, transform.rotation);
+							float scale = 1f * baseWidth / bitmap.getWidth();
+							ViewCompat.setScaleX(iv, scale);
+							ViewCompat.setScaleY(iv, scale);
+							iv.setImageBitmap(bitmap);
+							iv.setXY(transform.centerX, transform.centerY);
+							photoPanel.addView(iv);
+							return iv;
+						}
+					}, Task.UI_THREAD_EXECUTOR);
 				}
 				photoPanel.invalidate();
 				break;
@@ -160,8 +177,7 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 
 	@SuppressLint("NewApi")
 	private void addTextView(String text, int color, boolean hasStroke) {
-		//BaseLabelView tv = ComponentFactory.createText(this, this);
-		BaseLabelView tv = ComponentFactory.create(ComponentFactory.COMPONENT_LABEL, this);
+		BaseLabelView tv = ComponentFactory.create(ComponentFactory.COMPONENT_LABEL, this, textPanel);
 		tv.setListener(this);
 		tv.setXY(textPanel.getWidth() / 2, textPanel.getHeight() / 2);
 		tv.setText(text, color, hasStroke);

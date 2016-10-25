@@ -73,7 +73,7 @@ public class GlassesDetector {
 	@SuppressLint("NewApi")
 	private void addGlasses(int x1, int y1, int x2, int y2, View view) {
 		//StickerView sticker = ComponentFactory.createSticker(ctx);
-		StickerView sticker = ComponentFactory.create(ComponentFactory.COMPONENT_STICKER, ctx);
+		StickerView sticker = ComponentFactory.create(ComponentFactory.COMPONENT_STICKER, ctx, root);
 		sticker.setImageResource(GLASSES_RES_LIST[random.nextInt(GLASSES_RES_LIST.length)]);
 		int w = Math.abs(x2 - x1);
 		int h = w / 2;// FIXME

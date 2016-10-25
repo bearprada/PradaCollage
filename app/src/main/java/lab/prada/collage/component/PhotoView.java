@@ -2,6 +2,8 @@ package lab.prada.collage.component;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.v4.view.ViewCompat;
+import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,11 +20,21 @@ public class PhotoView extends ImageView implements BaseComponent {
 	private OnPhotoListener listener;
 
 
-	PhotoView(Context context) {
+	public PhotoView(Context context) {
 		super(context);
-		this.setOnTouchListener(new MultiTouchListener());
+		setOnTouchListener(new MultiTouchListener());
 	}
-	
+
+	public PhotoView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		setOnTouchListener(new MultiTouchListener());
+	}
+
+	public PhotoView(Context context, AttributeSet attrs, int defStyleAttr) {
+		super(context, attrs, defStyleAttr);
+		setOnTouchListener(new MultiTouchListener());
+	}
+
 	public void setImage(Bitmap bitmap){
 		setImageBitmap(bitmap);
 	}
@@ -56,7 +68,7 @@ public class PhotoView extends ImageView implements BaseComponent {
 
 	@Override
 	public void setXY(int x, int y) {
-		setX(x);
-		setY(y);
+		ViewCompat.setX(this, x);
+		ViewCompat.setY(this, y);
 	}
 }

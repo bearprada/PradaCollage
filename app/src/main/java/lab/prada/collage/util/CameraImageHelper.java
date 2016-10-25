@@ -47,7 +47,7 @@ public class CameraImageHelper {
 			Matrix mtx = new Matrix();
 			mtx.preRotate(rotate);
 			bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, false);
-			bitmap = bitmap.copy(Bitmap.Config.RGB_565, true);
+			bitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 		}
 		return bitmap;
 

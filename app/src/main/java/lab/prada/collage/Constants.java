@@ -31,7 +31,7 @@ public class Constants {
 	public static class Frame{
 		public Vector<Rect> layout;
 		public Frame(int num){
-			layout = new Vector<Rect>(num);
+			layout = new Vector<>(num);
 		}
 	}
 	public final static float SMALL_SCALE_FACTOR = 0.4F;

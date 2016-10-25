@@ -1,6 +1,10 @@
 package lab.prada.collage.component;
 
 import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+
+import lab.prada.collage.R;
 
 public class ComponentFactory {
 	
@@ -9,9 +13,9 @@ public class ComponentFactory {
 	public final static int COMPONENT_LABEL = 2;
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends BaseComponent> T create(int type, Context ctx){
+	public static <T extends BaseComponent> T create(int type, Context ctx, ViewGroup parent){
 		switch(type){
-		case COMPONENT_IMAGE:	return (T) new PhotoView(ctx);
+		case COMPONENT_IMAGE:	return (T) LayoutInflater.from(ctx).inflate(R.layout.scrap_image, parent, false);
 		case COMPONENT_STICKER: return (T) new StickerView(ctx);
 		case COMPONENT_LABEL: 	return (T) new LabelViewImpl(ctx);
 		default : return null;
