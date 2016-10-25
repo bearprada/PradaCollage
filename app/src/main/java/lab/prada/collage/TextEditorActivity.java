@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 import afzkl.development.mColorPicker.views.ColorPickerView;
 
-public class TextEditorActivity extends Activity {
+public class TextEditorActivity extends BaseActivity {
 	
 	private ColorPickerView cp;
 	

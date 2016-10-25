@@ -31,7 +31,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-public class MultipleImagePickerActivity extends Activity implements OnItemClickListener {
+public class MultipleImagePickerActivity extends BaseActivity implements OnItemClickListener {
 
 	protected static final String EXTRA_IMAGE_PICKER_IMAGE_PATH = "image_path";
 	private DisplayImageOptions options;

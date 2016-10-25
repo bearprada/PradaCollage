@@ -1,13 +1,12 @@
 package lab.prada.collage;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 
-public class SplashActivity extends Activity implements AnimationListener {
+public class SplashActivity extends BaseActivity implements AnimationListener {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -32,11 +31,6 @@ public class SplashActivity extends Activity implements AnimationListener {
 
 	@Override
 	public void onAnimationStart(Animation arg0) {
-		//do nothing
-	}
-	
-	@Override
-	public void onBackPressed() {
 		//do nothing
 	}
 }
