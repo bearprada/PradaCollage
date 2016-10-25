@@ -74,15 +74,14 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
-		super.onActivityResult(requestCode, resultCode, intent);
-		if (resultCode == RESULT_OK) {
-			switch (requestCode) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		if (resultCode != RESULT_OK) {
+			super.onActivityResult(requestCode, resultCode, intent);
+			return;
+		}
+		switch (requestCode) {
 			case SELECT_PHOTO:
-				String[] paths = intent
-						.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
-
+				String[] paths = intent.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
 				if (paths.length <= 0) {
 					return;
 				}
@@ -106,45 +105,40 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 				photoPanel.invalidate();
 				break;
 			case MODIFY_PHOTO:
-				if (currentSelectedImage != null) {
-					try {
-						Bitmap bitmap = CameraImageHelper.checkAndRotatePhoto(getRealPathFromURI(intent.getData()));
-						if(bitmap!=null){
-							currentSelectedImage.setImage(bitmap);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					currentSelectedImage = null;
+				if (currentSelectedImage == null) {
+					return;
 				}
+				try {
+					Bitmap bitmap = CameraImageHelper.checkAndRotatePhoto(getRealPathFromURI(intent.getData()));
+					if(bitmap != null){
+						currentSelectedImage.setImage(bitmap);
+					}
+				} catch (IOException e) {}
+				currentSelectedImage = null;
 				break;
 			case ADD_NEW_TEXT:
-				String text = intent
-						.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
+				String text = intent.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
 				if (text == null || text.trim() == null)
 					return;
-				int color = intent.getIntExtra(
-						TextEditorActivity.EXTRA_EDITOR_COLOR, Color.BLACK);
-				boolean hasStroke = intent.getBooleanExtra(
-						TextEditorActivity.EXTRA_EDITOR_BORDER, false);
+				int color = intent.getIntExtra(TextEditorActivity.EXTRA_EDITOR_COLOR, Color.BLACK);
+				boolean hasStroke = intent.getBooleanExtra(TextEditorActivity.EXTRA_EDITOR_BORDER, false);
 				addTextView(text, color, hasStroke);
 				break;
 			case MODIFY_TEXT:
-				if (currentSelectedText != null) {
-					String txt = intent
-							.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
-					if (txt == null)
-						return;
-					currentSelectedText.setText(txt,
-							intent.getIntExtra(
-									TextEditorActivity.EXTRA_EDITOR_COLOR,
-									Color.BLACK), intent.getBooleanExtra(
-									TextEditorActivity.EXTRA_EDITOR_BORDER,
-									false));
-					currentSelectedText = null;
+				if (currentSelectedText == null) {
+					return;
 				}
+				String txt = intent.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
+				if (txt == null) {
+					return;
+				}
+				currentSelectedText.setText(txt,
+					intent.getIntExtra(TextEditorActivity.EXTRA_EDITOR_COLOR, Color.BLACK),
+					intent.getBooleanExtra(TextEditorActivity.EXTRA_EDITOR_BORDER, false));
+				currentSelectedText = null;
 				break;
-			}
+			default:
+				super.onActivityResult(requestCode, resultCode, intent);
 		}
 	}
 	
@@ -220,16 +214,13 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 	private PhotoView currentSelectedImage = null;
 
 	@Override
-	public void onModifyLabel(BaseLabelView view, String text, int color,
-			boolean hasStroke) {
-		Intent intent = new Intent(this, TextEditorActivity.class);
+	public void onModifyLabel(BaseLabelView view, String text, int color, boolean hasStroke) {
 		currentSelectedText = view;
-		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_TEXT, text);
-		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_COLOR, color);
-		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_BORDER, hasStroke);
-		intent.putExtra(TextEditorActivity.EXTRA_EDITOR_TYPE,
-				TextEditorActivity.TYPE_UPDATE);
-		startActivityForResult(intent, MODIFY_TEXT);
+		startActivityForResult(new Intent(this, TextEditorActivity.class)
+		   .putExtra(TextEditorActivity.EXTRA_EDITOR_TEXT, text)
+		   .putExtra(TextEditorActivity.EXTRA_EDITOR_COLOR, color)
+		   .putExtra(TextEditorActivity.EXTRA_EDITOR_BORDER, hasStroke)
+		   .putExtra(TextEditorActivity.EXTRA_EDITOR_TYPE, TextEditorActivity.TYPE_UPDATE), MODIFY_TEXT);
 	}
 
 	@Override
