@@ -13,11 +13,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.view.ViewCompat;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.androidquery.AQuery;
 import lab.prada.collage.util.CollageUtils;
 
 import java.io.IOException;
@@ -33,14 +33,14 @@ import lab.prada.collage.util.GlassesDetector;
 import lab.prada.collage.util.StoreImageHelper;
 import lab.prada.collage.util.StoreImageHelper.onSaveListener;
 
-public class MainActivity extends Activity implements OnLabelListener, OnPhotoListener {
+public class MainActivity extends Activity implements OnLabelListener, OnPhotoListener,
+													  View.OnClickListener {
 
 	private static final int SELECT_PHOTO = 0;
 	private static final int ADD_NEW_TEXT = 1;
 	private static final int MODIFY_TEXT = 2;
 	private static final int MODIFY_PHOTO = 3;
 
-	private AQuery aq;
 	private ProgressDialog progressDialog;
 	private ViewGroup allViews;
 	private ViewGroup textPanel;
@@ -50,14 +50,15 @@ public class MainActivity extends Activity implements OnLabelListener, OnPhotoLi
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		aq = new AQuery(this);
-		aq.find(R.id.btnSave).clicked(this, "clickSave");
-		aq.find(R.id.btnAddPic).clicked(this, "clickAddPic");
-		aq.find(R.id.btnAddText).clicked(this, "clickAddText");
-		aq.find(R.id.btnAddGlasses).clicked(this, "clickAddGlasses");
-		allViews = (ViewGroup) aq.find(R.id.frame).getView();
-		textPanel = (ViewGroup) aq.find(R.id.frame_texts).getView();
-		photoPanel = (ViewGroup) aq.find(R.id.frame_images).getView();
+
+
+		findViewById(R.id.btnSave).setOnClickListener(this);
+		findViewById(R.id.btnAddPic).setOnClickListener(this);
+		findViewById(R.id.btnAddText).setOnClickListener(this);
+		findViewById(R.id.btnAddGlasses).setOnClickListener(this);
+		allViews = (ViewGroup) findViewById(R.id.frame);
+		textPanel = (ViewGroup) findViewById(R.id.frame_texts);
+		photoPanel = (ViewGroup) findViewById(R.id.frame_images);
 	}
 
 	private void showProgressDialog(boolean enable) {
@@ -71,46 +72,6 @@ public class MainActivity extends Activity implements OnLabelListener, OnPhotoLi
 				progressDialog = null;
 			}
 		}
-	}
-
-	public void clickSave(View button) {
-		showProgressDialog(true);
-		StoreImageHelper.save(getContentResolver(), allViews,
-				new onSaveListener() {
-					@Override
-					public void onSaveSuccess() {
-						showProgressDialog(false);
-					}
-
-					@Override
-					public void onSaveFail() {
-						showProgressDialog(false);
-					}
-				});
-	}
-
-	public void clickAddPic(View button) {
-		Intent intent = new Intent(this, MultipleImagePickerActivity.class);
-		startActivityForResult(intent, SELECT_PHOTO);
-	}
-
-	public void clickAddGlasses(View button) {
-		/*
-		 * showProgressDialog(true); new Thread(new Runnable() {
-		 * 
-		 * @Override public void run() {
-		 */
-		cleanSticks();
-		GlassesDetector detector = new GlassesDetector(MainActivity.this,
-				(ViewGroup) aq.find(R.id.frame_sticks).getView());
-		detector.detectFaces((ViewGroup) aq.find(R.id.frame_images).getView());
-		/*
-		 * showProgressDialog(false); } }).start();
-		 */
-	}
-
-	private void cleanSticks() {
-		((ViewGroup) aq.find(R.id.frame_sticks).getView()).removeAllViews();
 	}
 
 	@Override
@@ -135,12 +96,10 @@ public class MainActivity extends Activity implements OnLabelListener, OnPhotoLi
 
 					try {
 						// angle
-						iv.setRotation(t.rotation);
-						iv.setScaleX(t.scaleX);
-						iv.setScaleY(t.scaleY);
-
-						iv.setImageBitmap(CameraImageHelper
-								.checkAndRotatePhoto(paths[i++]));
+						ViewCompat.setRotation(iv, t.rotation);
+						ViewCompat.setScaleX(iv, t.scaleX);
+						ViewCompat.setScaleY(iv, t.scaleY);
+						iv.setImageBitmap(CameraImageHelper.checkAndRotatePhoto(paths[i++]));
 						iv.setXY(t.centerX, t.centerY);
 						photoPanel.addView(iv);
 					} catch (IOException e) {}
@@ -175,7 +134,7 @@ public class MainActivity extends Activity implements OnLabelListener, OnPhotoLi
 				if (currentSelectedText != null) {
 					String txt = intent
 							.getStringExtra(TextEditorActivity.EXTRA_EDITOR_TEXT);
-					if (txt == null || txt.trim() == null)
+					if (txt == null)
 						return;
 					currentSelectedText.setText(txt,
 							intent.getIntExtra(
@@ -213,11 +172,6 @@ public class MainActivity extends Activity implements OnLabelListener, OnPhotoLi
 		tv.setXY(textPanel.getWidth() / 2, textPanel.getHeight() / 2);
 		tv.setText(text, color, hasStroke);
 		textPanel.addView(tv.getView());
-	}
-
-	public void clickAddText(View button) {
-		Intent intent = new Intent(this, TextEditorActivity.class);
-		startActivityForResult(intent, ADD_NEW_TEXT);
 	}
 
 	@Override
@@ -272,5 +226,46 @@ public class MainActivity extends Activity implements OnLabelListener, OnPhotoLi
 		Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
 		photoPickerIntent.setType("image/*");
 		startActivityForResult(photoPickerIntent, MODIFY_PHOTO);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+			case R.id.btnSave:
+				showProgressDialog(true);
+				StoreImageHelper.save(getContentResolver(), allViews,
+					new onSaveListener() {
+					  	@Override
+					  	public void onSaveSuccess() {
+						  showProgressDialog(false);
+					  }
+
+					  	@Override
+					  	public void onSaveFail() {
+						  showProgressDialog(false);
+					  }
+					});
+				break;
+			case R.id.btnAddPic:
+				startActivityForResult(new Intent(this, MultipleImagePickerActivity.class), SELECT_PHOTO);
+				break;
+			case R.id.btnAddText:
+				startActivityForResult(new Intent(this, TextEditorActivity.class), ADD_NEW_TEXT);
+				break;
+			case R.id.btnAddGlasses:
+				/*
+				 * showProgressDialog(true); new Thread(new Runnable() {
+				 *
+				 * @Override public void run() {
+				 */
+				((ViewGroup) findViewById(R.id.frame_sticks)).removeAllViews();
+				GlassesDetector detector = new GlassesDetector(MainActivity.this,
+															   (ViewGroup) findViewById(R.id.frame_sticks));
+				detector.detectFaces((ViewGroup) findViewById(R.id.frame_images));
+				/*
+				 * showProgressDialog(false); } }).start();
+				 */
+				break;
+		}
 	}
 }

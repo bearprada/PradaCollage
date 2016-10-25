@@ -1,18 +1,17 @@
 package lab.prada.collage;
 
-import com.androidquery.AQuery;
-
-import afzkl.development.mColorPicker.views.ColorPickerView;
-import afzkl.development.mColorPicker.views.ColorPickerView.OnColorChangedListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.EditText;
+
+import afzkl.development.mColorPicker.views.ColorPickerView;
 
 public class TextEditorActivity extends Activity {
 	
-	private AQuery aq;
 	private ColorPickerView cp;
 	
 	public final static int TYPE_NEW = 0;
@@ -21,35 +20,38 @@ public class TextEditorActivity extends Activity {
 	public final static String EXTRA_EDITOR_TEXT = "text";
 	public final static String EXTRA_EDITOR_COLOR = "color";
 	public final static String EXTRA_EDITOR_BORDER = "border";
+	private EditText mEditText;
 	//public final static String EXTRA_EDITOR_FONT = "font"; //TODO set the font type
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.text_editor);
-		aq = new AQuery(this);
-		cp = (ColorPickerView) aq.find(R.id.colorPickerView1).getView();
-		aq.find(R.id.btnFinish).clicked(this, "clickFinish");
+		cp = (ColorPickerView) findViewById(R.id.colorPickerView1);
+		mEditText = (EditText) findViewById(R.id.editText1);
+		final CheckBox mHasStroke = (CheckBox) findViewById(R.id.checkBoxHasStroke);
+		findViewById(R.id.btnFinish).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Bundle bundle = new Bundle();
+				bundle.putString(EXTRA_EDITOR_TEXT, mEditText.getText().toString());
+				bundle.putInt(EXTRA_EDITOR_COLOR, cp.getColor());
+				bundle.putBoolean(EXTRA_EDITOR_BORDER, mHasStroke.isChecked());
+				Intent intent = new Intent();
+				intent.putExtras(bundle);
+				setResult(RESULT_OK, intent);
+				finish();
+			}
+		});
 		switch(getIntent().getIntExtra(EXTRA_EDITOR_TYPE, TYPE_NEW)){
 		case TYPE_NEW:
 			// do nothing
 			break;
 		case TYPE_UPDATE:
-			aq.find(R.id.editText1).text(getIntent().getStringExtra(EXTRA_EDITOR_TEXT));
+			mEditText.setText(getIntent().getStringExtra(EXTRA_EDITOR_TEXT));
 			cp.setColor(getIntent().getIntExtra(EXTRA_EDITOR_COLOR,Color.BLACK));
-			aq.find(R.id.checkBoxHasStroke).checked(getIntent().getBooleanExtra(EXTRA_EDITOR_BORDER, false));
+			mHasStroke.setChecked(getIntent().getBooleanExtra(EXTRA_EDITOR_BORDER, false));
 			break;
 		}
-	}
-	
-	public void clickFinish(View button){
-	    Bundle bundle = new Bundle();  
-	    bundle.putString(EXTRA_EDITOR_TEXT, aq.find(R.id.editText1).getEditText().getText().toString());  
-	    bundle.putInt(EXTRA_EDITOR_COLOR, cp.getColor());
-	    bundle.putBoolean(EXTRA_EDITOR_BORDER, aq.find(R.id.checkBoxHasStroke).isChecked());
-	    Intent intent = new Intent();  
-	    intent.putExtras(bundle);
-	    setResult(RESULT_OK, intent);
-		finish();
 	}
 }

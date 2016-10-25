@@ -1,48 +1,41 @@
 package lab.prada.collage;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.content.CursorLoader;
+import android.util.Log;
+import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.Toast;
 
-import com.androidquery.AQuery;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Images;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.support.v4.content.CursorLoader;
-import android.util.Log;
-import android.view.Menu;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
 
 public class MultipleImagePickerActivity extends Activity implements OnItemClickListener {
 
 	protected static final String EXTRA_IMAGE_PICKER_IMAGE_PATH = "image_path";
 	private DisplayImageOptions options;
-	private GridView listView;
 	private ImageLoader imageLoader = ImageLoader.getInstance();
-	private AQuery aq;
 	private ImageAdapter adapter;
 
 	@Override
@@ -50,18 +43,33 @@ public class MultipleImagePickerActivity extends Activity implements OnItemClick
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_multiple_image_picker);
 		initImageLoader(this);
-		aq = new AQuery(this);
-		aq.find(R.id.btnOk).clicked(this, "clickOk");
-		aq.find(R.id.btnCancel).clicked(this, "clickCancel");
+		findViewById(R.id.btnOk).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Bundle bundle = new Bundle();
+				bundle.putStringArray(EXTRA_IMAGE_PICKER_IMAGE_PATH, adapter.getSelectedItems());
+				Intent intent = new Intent();
+				intent.putExtras(bundle);
+				setResult(RESULT_OK, intent);
+				finish();
+			}
+		});
+		findViewById(R.id.btnCancel).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
 		options = new DisplayImageOptions.Builder()
 				.showStubImage(R.drawable.ic_stub)
 				.showImageForEmptyUri(R.drawable.ic_empty)
 				.showImageOnFail(R.drawable.ic_error).cacheInMemory(true)
 				.cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
-		listView = (GridView) findViewById(R.id.gridView);
+		GridView listView = (GridView) findViewById(R.id.gridView);
 		
 		adapter = new ImageAdapter(getCameraImages(this));
-		((GridView) listView).setAdapter(adapter);
+		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 	}
 	
@@ -70,20 +78,6 @@ public class MultipleImagePickerActivity extends Activity implements OnItemClick
 		super.onDestroy();
 		adapter.dispose();
 	}
-	
-	public void clickOk(View button){
-		Bundle bundle = new Bundle();  
-	    bundle.putStringArray(EXTRA_IMAGE_PICKER_IMAGE_PATH, adapter.getSelectedItems());
-	    Intent intent = new Intent();  
-	    intent.putExtras(bundle);  
-	    setResult(RESULT_OK, intent);
-	    finish();
-	}
-	
-	public void clickCancel(View button){
-		finish();
-	}
-
 	public static void initImageLoader(Context context) {
 		// This configuration tuning is custom. You can tune every option, you
 		// may tune some of them,
