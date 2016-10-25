@@ -3,41 +3,32 @@ package lab.prada.collage;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.bumptech.glide.Glide;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
 
 public class MultipleImagePickerActivity extends BaseActivity {
 
 	protected static final String EXTRA_IMAGE_PICKER_IMAGE_PATH = "image_path";
-	private DisplayImageOptions options;
-	private ImageLoader imageLoader = ImageLoader.getInstance();
-	private ImageAdapter adapter;
+	private ImageAdapter mAdapter;
+	private ArrayList<String> mSelectedUrl = new ArrayList<>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,54 +36,44 @@ public class MultipleImagePickerActivity extends BaseActivity {
 		setContentView(R.layout.activity_multiple_image_picker);
 		setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		RecyclerView listView = (RecyclerView) findViewById(R.id.photo_list);
 
-		initImageLoader(this);
-		options = new DisplayImageOptions.Builder()
-				.showStubImage(R.drawable.ic_stub)
-				.showImageForEmptyUri(R.drawable.ic_empty)
-				.showImageOnFail(R.drawable.ic_error).cacheInMemory(true)
-				.cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565).build();
-		GridView listView = (GridView) findViewById(R.id.gridView);
-
-		adapter = new ImageAdapter(getCameraImages(this));
-		listView.setAdapter(adapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
+		mAdapter = new ImageAdapter(this, getCameraImages(), new IPhotoChecker() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				adapter.selected(position);
+			public boolean isSelected(String path) {
+				return mSelectedUrl.contains(path);
+			}
+		}, new OnRecyclerItemClickedListener<String>() {
+			@Override
+			public void onItemClicked(String data) {
+				if (selected(data)) {
+					mAdapter.notifyDataSetChanged();
+				}
 			}
 		});
+		GridLayoutManager glm = new GridLayoutManager(this, 3);
+		listView.setLayoutManager(glm);
+		listView.setAdapter(mAdapter);
+	}
+
+	private boolean selected(String path){
+		if (mSelectedUrl.size() > Constants.SUPPORTED_FRAME_NUMBER) {
+			Toast.makeText(MultipleImagePickerActivity.this, R.string.over_num_of_images, Toast.LENGTH_LONG).show();
+			return false;
+		}
+		if (mSelectedUrl.contains(path)) {
+			mSelectedUrl.remove(path);
+		} else {
+			mSelectedUrl.add(path);
+		}
+		return true;
 	}
 	
-	@Override
-	protected void onDestroy(){
-		super.onDestroy();
-		adapter.dispose();
-	}
-
-	public static void initImageLoader(Context context) {
-		// This configuration tuning is custom. You can tune every option, you
-		// may tune some of them,
-		// or you can create default configuration by
-		// ImageLoaderConfiguration.createDefault(this);
-		// method.
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
-				context).threadPriority(Thread.NORM_PRIORITY - 2)
-				.denyCacheImageMultipleSizesInMemory()
-				.discCacheFileNameGenerator(new Md5FileNameGenerator())
-				.tasksProcessingOrder(QueueProcessingType.LIFO)
-				.writeDebugLogs() // Remove for release app
-				.build();
-		// Initialize ImageLoader with configuration.
-		ImageLoader.getInstance().init(config);
-	}
-
-	public List<String> getCameraImages(Context context) {
+	public List<String> getCameraImages() {
 		String[] projection = new String[] { MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA };
 		Uri images = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-		Cursor cur = new CursorLoader(this,images,projection,"",null,"").loadInBackground();
-		Log.i("ListingImages", " query count=" + cur.getCount());
-		ArrayList<String> imagePaths = new ArrayList<String>(cur.getCount());
+		Cursor cur = new CursorLoader(this, images,projection, "", null, "").loadInBackground();
+		ArrayList<String> imagePaths = new ArrayList<>(cur.getCount());
 		int rawCol = cur.getColumnIndex(MediaStore.Images.Media.DATA);
 		if (cur.moveToFirst()) {
 			do {
@@ -102,77 +83,62 @@ public class MultipleImagePickerActivity extends BaseActivity {
 		return imagePaths;
 	}
 
-	public class ImageAdapter extends BaseAdapter {
-		private List<String> datasource;
-		private Hashtable<Integer,Boolean> selectionTable = new Hashtable<Integer,Boolean>();
+	public interface IPhotoChecker {
+		boolean isSelected(String path);
+	}
 
-		public ImageAdapter(List<String> cameraImages) {
-			datasource = cameraImages;
+	public interface OnRecyclerItemClickedListener<T> {
+		void onItemClicked(T data);
+	}
+
+	static class ImageAdapter extends RecyclerView.Adapter {
+		private final List<String> datasource;
+		private final Context mContext;
+		private final IPhotoChecker mChecker;
+		private final OnRecyclerItemClickedListener<String> mListener;
+
+		ImageAdapter(Context ctx, List<String> images, IPhotoChecker checker,
+					 OnRecyclerItemClickedListener<String> listener) {
+			datasource = images;
+			mContext = ctx;
+			mChecker = checker;
+			mListener = listener;
 		}
 		
-		private void selected(int position){
-			if(selectionTable.size()>Constants.SUPPORTED_FRAME_NUMBER){
-				Toast.makeText(MultipleImagePickerActivity.this, R.string.over_num_of_images, Toast.LENGTH_LONG).show();
-			}else{
-				if(selectionTable.containsKey(position)){
-					selectionTable.remove(position);
-				}else{
-					selectionTable.put(position, true);
+		@Override
+		public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+			View v = LayoutInflater.from(mContext).inflate(R.layout.item_grid_image, parent, false);
+			return new RecyclerView.ViewHolder(v) {};
+		}
+
+		@Override
+		public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+			final String path = datasource.get(position);
+			int visible = mChecker.isSelected(path) ? View.VISIBLE : View.INVISIBLE;
+			holder.itemView.findViewById(R.id.imageView1).setVisibility(visible);
+			holder.itemView.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (mListener != null) {
+						mListener.onItemClicked(path);
+					}
 				}
-				notifyDataSetChanged();
-			}
-		}
-		
-		public String[] getSelectedItems(){
-			String[] items = new String[selectionTable.size()];
-			Enumeration<Integer> ks = selectionTable.keys();
-			int count = 0;
-			while(ks.hasMoreElements()){
-				items[count++] = datasource.get(ks.nextElement());
-			}
-			return items;
-		}
-		
-		private boolean isSelected(int position){
-			return selectionTable.containsKey(position);
-		}
-
-		@Override
-		public int getCount() {
-			return datasource.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return datasource.get(position);
+			});
+			Glide.with(mContext)
+				 .load(new File(path))
+				 .placeholder(R.drawable.ic_empty)
+				 .error(R.drawable.ic_error)
+				 .into((ImageView) holder.itemView.findViewById(R.id.image));
 		}
 
 		@Override
 		public long getItemId(int position) {
 			return position;
 		}
-		
-		public void dispose(){
-			datasource.clear();
-			datasource = null;
-			selectionTable.clear();
-			selectionTable = null;
-		}
 
 		@Override
-		public View getView(final int position, View convertView, ViewGroup parent) {
-			final View view;
-			if (convertView == null) {
-				view = getLayoutInflater().inflate(R.layout.item_grid_image, parent, false);
-			} else {
-				view = convertView;
-			}
-			
-			Log.d("TEST","@@@@ "+position + " " +isSelected(position));
-			view.findViewById(R.id.imageView1).setVisibility((isSelected(position)?View.VISIBLE:View.INVISIBLE));
-			imageLoader.displayImage("file://"+datasource.get(position), (ImageView) view.findViewById(R.id.image),
-					options);
-			return view;
+		public int getItemCount() {
+			return datasource.size();
 		}
 	}
 
@@ -190,7 +156,7 @@ public class MultipleImagePickerActivity extends BaseActivity {
 				return true;
 			case R.id.action_choose:
 				Bundle bundle = new Bundle();
-				bundle.putStringArray(EXTRA_IMAGE_PICKER_IMAGE_PATH, adapter.getSelectedItems());
+				bundle.putStringArrayList(EXTRA_IMAGE_PICKER_IMAGE_PATH, mSelectedUrl);
 				Intent intent = new Intent();
 				intent.putExtras(bundle);
 				setResult(RESULT_OK, intent);

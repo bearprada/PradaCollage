@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import lab.prada.collage.component.BaseLabelView;
@@ -81,11 +82,11 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 		}
 		switch (requestCode) {
 			case SELECT_PHOTO:
-				String[] paths = intent.getStringArrayExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
-				if (paths.length <= 0) {
+				ArrayList<String> paths = intent.getStringArrayListExtra(MultipleImagePickerActivity.EXTRA_IMAGE_PICKER_IMAGE_PATH);
+				if (paths.isEmpty()) {
 					return;
 				}
-				List<CollageUtils.ScrapTransform> trans = CollageUtils.generateScrapsTransform(photoPanel.getWidth(), photoPanel.getHeight(), paths.length);
+				List<CollageUtils.ScrapTransform> trans = CollageUtils.generateScrapsTransform(photoPanel.getWidth(), photoPanel.getHeight(), paths.size());
 				clearImages();
 				int i = 0;
 				for (CollageUtils.ScrapTransform t : trans) {
@@ -97,7 +98,7 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 						ViewCompat.setRotation(iv, t.rotation);
 						ViewCompat.setScaleX(iv, t.scaleX);
 						ViewCompat.setScaleY(iv, t.scaleY);
-						iv.setImageBitmap(CameraImageHelper.checkAndRotatePhoto(paths[i++]));
+						iv.setImageBitmap(CameraImageHelper.checkAndRotatePhoto(paths.get(i++)));
 						iv.setXY(t.centerX, t.centerY);
 						photoPanel.addView(iv);
 					} catch (IOException e) {}
