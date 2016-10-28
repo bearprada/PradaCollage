@@ -17,6 +17,12 @@ public class PhotoView extends ImageView implements BaseComponent {
 		void onModifyPhoto(PhotoView view);
 	}
 
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+		android.util.Log.d("DEBUG", "onAttachedToWindow : " + toString());
+	}
+
 	private OnPhotoListener listener;
 
 

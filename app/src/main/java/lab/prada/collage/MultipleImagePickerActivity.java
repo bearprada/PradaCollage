@@ -46,9 +46,7 @@ public class MultipleImagePickerActivity extends BaseActivity {
 		}, new OnRecyclerItemClickedListener<String>() {
 			@Override
 			public void onItemClicked(String data) {
-				if (selected(data)) {
-					mAdapter.notifyDataSetChanged();
-				}
+				selected(data);
 			}
 		});
 		GridLayoutManager glm = new GridLayoutManager(this, 3);
@@ -112,7 +110,7 @@ public class MultipleImagePickerActivity extends BaseActivity {
 		}
 
 		@Override
-		public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+		public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
 			final String path = datasource.get(position);
 			int visible = mChecker.isSelected(path) ? View.VISIBLE : View.INVISIBLE;
 			holder.itemView.findViewById(R.id.imageView1).setVisibility(visible);
@@ -122,6 +120,8 @@ public class MultipleImagePickerActivity extends BaseActivity {
 					if (mListener != null) {
 						mListener.onItemClicked(path);
 					}
+					int visible = mChecker.isSelected(path) ? View.VISIBLE : View.INVISIBLE;
+					holder.itemView.findViewById(R.id.imageView1).setVisibility(visible);
 				}
 			});
 			Glide.with(mContext)
