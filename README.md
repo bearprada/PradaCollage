@@ -9,6 +9,7 @@ TODO List
 Future Works
 
 1. the frame layout should be irregularity shapes. for example : Masonry style
+2. support the runtime permission (read/write the external storage)
 
 
 v0.2
@@ -25,4 +26,4 @@ v0.1
 3. Support move and scale(pinch zoom) the scraps.
 4. Export the result to gallery with different resolutions.
 
-![alt tag](http://farm8.staticflickr.com/7335/9274275412_c5c4ea6403_o_d.png)
+![alt tag](https://farm6.staticflickr.com/5654/25365850289_1a46d7c7db_z_d.jpg)
