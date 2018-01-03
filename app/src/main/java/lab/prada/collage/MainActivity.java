@@ -1,5 +1,6 @@
 package lab.prada.collage;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -18,6 +19,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +30,7 @@ import java.util.concurrent.Callable;
 
 import bolts.Continuation;
 import bolts.Task;
+import io.reactivex.functions.Consumer;
 import lab.prada.collage.component.BaseLabelView;
 import lab.prada.collage.component.BaseLabelView.OnLabelListener;
 import lab.prada.collage.component.ComponentFactory;
@@ -59,9 +64,9 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 
 		findViewById(R.id.btnAddPic).setOnClickListener(this);
 		findViewById(R.id.btnAddText).setOnClickListener(this);
-		allViews = (ViewGroup) findViewById(R.id.frame);
-		textPanel = (ViewGroup) findViewById(R.id.frame_texts);
-		photoPanel = (ViewGroup) findViewById(R.id.frame_images);
+		allViews = findViewById(R.id.frame);
+		textPanel = findViewById(R.id.frame_texts);
+		photoPanel = findViewById(R.id.frame_images);
 	}
 
 	private void showProgressDialog(boolean enable) {
@@ -276,7 +281,20 @@ public class MainActivity extends BaseActivity implements OnLabelListener, OnPho
 	public void onClick(View v) {
 		switch (v.getId()) {
 			case R.id.btnAddPic:
-				startActivityForResult(new Intent(this, MultipleImagePickerActivity.class), SELECT_PHOTO);
+                // Must be done during an initialization phase like onCreate
+                new RxPermissions(this)
+                    .request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    .subscribe(new Consumer<Boolean>() {
+                        @Override
+                        public void accept(Boolean grant) throws Exception {
+                            if (grant) {
+                                startActivityForResult(new Intent(MainActivity.this, MultipleImagePickerActivity.class), SELECT_PHOTO);
+                            } else {
+                                Toast.makeText(MainActivity.this, "permission denied", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+
 				break;
 			case R.id.btnAddText:
 				startActivityForResult(new Intent(this, TextEditorActivity.class), ADD_NEW_TEXT);
